@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>oculus_sonar_ros</name>
+  <version>0.0.1</version>
+  <description>ROS Package to interface with a Blueprint Subsea Oculus imaging sonar</description>
+
+  <maintainer email="amarburg@uw.edu">A. Marburg</maintainer>
+  <license>MIT
+  </license>
+
+  <!-- ROS build reqs -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>std_msgs</depend>
+  <depend>imaging_sonar_msgs</depend>
+
+
+  <export>
+  </export>
+
+</package>
