@@ -10,6 +10,9 @@
 
   <!-- ROS build reqs -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+
+  <exec_depend>roscpp</exec_depend>
 
   <depend>std_msgs</depend>
   <depend>imaging_sonar_msgs</depend>

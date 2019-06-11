@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 2.8.3)
 project(oculus_sonar_ros)
 
 set( CATKIN_PACKAGES
+  roscpp
   std_msgs
   imaging_sonar_msgs
   g3log_catkin
-  active_object)
+  active_object )
 
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
@@ -51,16 +52,14 @@ include_directories(
   include/
 )
 
-add_library(liboculus
+
+add_library(oculus_sonar_lib
+            lib/OculusSonar.cpp
             liboculus/lib/SimpleFireMessage.cpp
             liboculus/lib/SonarStatus.cpp
             liboculus/lib/DataRx.cpp
             liboculus/lib/StatusRx.cpp)
-#target_link_libraries(liboculus)
-
-
-add_library(oculus_sonar_lib lib/Foo.cpp)
-target_link_libraries(oculus_sonar_lib liboculus ${catkin_LIBRARIES})
+target_link_libraries(oculus_sonar_lib ${catkin_LIBRARIES})
 
 
 ## Build the applications and nodes
