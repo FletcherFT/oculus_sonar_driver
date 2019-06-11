@@ -13,7 +13,8 @@
 
   <depend>std_msgs</depend>
   <depend>imaging_sonar_msgs</depend>
-
+  <depend>g3log_catkin</depend>
+  <depend>active_object</depend>
 
   <export>
   </export>
