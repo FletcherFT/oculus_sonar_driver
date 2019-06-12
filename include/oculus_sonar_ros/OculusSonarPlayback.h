@@ -2,6 +2,8 @@
 
 #include <ros/ros.h>
 
+#include "oculus_sonar_ros/OculusSonarBase.h"
+#include "liboculus/SonarPlayer.h"
 
 namespace oculus_sonar_ros {
 
@@ -11,15 +13,24 @@ namespace oculus_sonar_ros {
     OculusSonarPlayback() = delete;
     OculusSonarPlayback( const OculusSonarPlayback & ) = delete;
 
-    OculusSonarPlayback(ros::NodeHandle &nh );
+    OculusSonarPlayback(ros::NodeHandle &nh, float dt = 0.1 );
     virtual ~OculusSonarPlayback();
 
-    bool open( const std::string &filename )
+    bool open( const std::string &filename );
+
+    void doLoop( bool dl ) { _doLoop = dl; }
+
+    void nextPacket( const ros::TimerEvent& );
 
   private:
 
-    std::string _filename
+    std::string _filename;
 
+    liboculus::SonarPlayer _player;
+
+    ros::Timer _timer;
+    bool _doLoop;
+    float _dt;
   };
 
 }

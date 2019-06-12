@@ -53,21 +53,27 @@ include_directories(
 )
 
 
-add_library(oculus_sonar_lib
-            lib/OculusSonar.cpp
-            liboculus/lib/SimpleFireMessage.cpp
-            liboculus/lib/SonarStatus.cpp
-            liboculus/lib/DataRx.cpp
-            liboculus/lib/StatusRx.cpp)
+add_library( oculus_sonar_lib
+             lib/OculusSonarBase.cpp
+             lib/OculusSonarPlayback.cpp
+             lib/OculusSonarReal.cpp
+             liboculus/lib/SimpleFireMessage.cpp
+             liboculus/lib/SonarStatus.cpp
+             liboculus/lib/DataRx.cpp
+             liboculus/lib/SonarPlayer.cpp
+             liboculus/lib/StatusRx.cpp )
 target_link_libraries(oculus_sonar_lib ${catkin_LIBRARIES})
 
 
 ## Build the applications and nodes
 add_executable(oculus_sonar_driver app/OculusSonarNode.cpp)
-target_link_libraries(oculus_sonar_driver oculus_sonar_lib)
+target_link_libraries(oculus_sonar_driver oculus_sonar_lib ${catkin_LIBRARIES})
+
+add_executable(oculus_sonar_playback_driver app/OculusSonarPlaybackNode.cpp)
+target_link_libraries(oculus_sonar_playback_driver oculus_sonar_lib ${catkin_LIBRARIES})
 
 
-install(TARGETS oculus_sonar_lib oculus_sonar_driver
+install(TARGETS oculus_sonar_lib oculus_sonar_driver oculus_sonar_playback_driver
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

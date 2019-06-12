@@ -18,10 +18,26 @@ int main(int argc, char **argv) {
      ros::console::notifyLoggerLevelsChanged();
   }
 
-  std::string pointcloud_topic;
-  bool do_fusion;
+  std::string sonarFilename;
+  if(!nh.getParam("/sonar_filename", sonarFilename)) {
+    ROS_FATAL("Parameter \"sonar_filename\" not defined");
+  }
 
-  OculusSonarPlayback oculus( nh );
+  float sonarFps;
+  nh.param<float>("/sonar_fps", sonarFps, 10.0f);
+
+  bool doLoop;
+  nh.param("/do_loop", doLoop, false );
+
+  if( sonarFps <= 0 ) {
+    ROS_FATAL("sonarFps less than zero");
+  }
+
+  OculusSonarPlayback oculus( nh, 1.0/sonarFps );
+  oculus.doLoop( doLoop );
+  if(!oculus.open( sonarFilename )) {
+    ROS_FATAL_STREAM("Unable to open sonar filename \"" << sonarFilename << "\"");
+  }
 
   ros::spin();
 

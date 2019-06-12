@@ -4,9 +4,9 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 
+#include "oculus_sonar_ros/OculusSonarReal.h"
 
-#include "oculus_sonar_ros/OculusSonar.h"
-using oculus_sonar_ros::OculusSonar;
+using namespace oculus_sonar_ros;
 
 int main(int argc, char **argv) {
 
@@ -17,10 +17,7 @@ int main(int argc, char **argv) {
      ros::console::notifyLoggerLevelsChanged();
   }
 
-  std::string pointcloud_topic;
-  bool do_fusion;
-
-  OculusSonar oculus( nh );
+  OculusSonarReal oculus( nh );
 
   ros::spin();
 

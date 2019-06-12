@@ -2,22 +2,32 @@
 
 #include <ros/ros.h>
 
+#include "imaging_sonar_msgs/ImagingSonarMsg.h"
+#include "liboculus/SimplePingResult.h"
 
 namespace oculus_sonar_ros {
 
-  class OculusSonar {
+  using liboculus::SimplePingResult;
+  using imaging_sonar_msgs::ImagingSonarMsg;
+
+  class OculusSonarBase {
   public:
 
-    OculusSonar() = delete;
-    OculusSonar( const OculusSonar & ) = delete;
+    OculusSonarBase() = delete;
+    OculusSonarBase( const OculusSonarBase & ) = delete;
 
-    OculusSonar(ros::NodeHandle &nh);
+    OculusSonarBase(ros::NodeHandle &nh);
+    virtual ~OculusSonarBase();
 
-  private:
+    ImagingSonarMsg pingToMessage( const std::shared_ptr<SimplePingResult> &ping );
+
+  protected:
 
     ros::NodeHandle _nh;
 
     ros::Publisher _simplePingPub;
+
+    uint32_t _seq;
 
   };
 
