@@ -49,6 +49,7 @@ include_directories(
 
 add_library( oculus
              ../liboculus/lib/SimpleFireMessage.cpp
+             ../liboculus/lib/SimplePingResult.cpp
              ../liboculus/lib/SonarStatus.cpp
              ../liboculus/lib/DataRx.cpp
              ../liboculus/lib/SonarPlayer.cpp
