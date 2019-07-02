@@ -26,7 +26,7 @@ namespace oculus_sonar_ros {
 
     std::string _filename;
 
-    liboculus::SonarPlayer _player;
+    std::shared_ptr<liboculus::SonarPlayerBase> _player;
 
     ros::Timer _timer;
     bool _doLoop;

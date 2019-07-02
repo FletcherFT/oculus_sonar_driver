@@ -2,7 +2,7 @@
 #include <ros/console.h>
 
 #include "oculus_sonar_ros/OculusSonarBase.h"
-#include <imaging_sonar_msgs/imagingSonarMsg.h>
+#include <imaging_sonar_msgs/ImagingSonarMsg.h>
 
 namespace oculus_sonar_ros {
 
