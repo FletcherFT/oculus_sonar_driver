@@ -76,6 +76,9 @@ install(TARGETS oculus_sonar_lib oculus oculus_sonar_driver oculus_sonar_playbac
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 
+install( DIRECTORY launch/
+          DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch )
+
 ##== Unit tests ==
 
 file(GLOB LIBOCULUS_TESTS ../liboculus/test/unit/*.cpp )

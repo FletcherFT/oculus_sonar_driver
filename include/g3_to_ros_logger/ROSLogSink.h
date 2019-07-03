@@ -17,12 +17,17 @@ struct ROSLogSink {
   void ReceiveLogMessage(g3::LogMessageMover logEntry) {
     auto level = logEntry.get()._level;
 
+    std::string entry = logEntry.get().toString();
+
+    // Strip the trailing newline, otherwise we get conflicting/redundant newlines
+    entry.pop_back();
+
     if (level == WARNING) {
-      ROS_WARN_STREAM(logEntry.get().toString());
+      ROS_WARN_STREAM(entry);
     } else if (level == DEBUG) {
-      ROS_DEBUG_STREAM(logEntry.get().toString());
+      ROS_DEBUG_STREAM(entry);
     } else {
-      ROS_INFO_STREAM(logEntry.get().toString());
+      ROS_INFO_STREAM(entry);
     }
   }
 
