@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="oculus_sonar_ros" name="oculus_sonar" type="oculus_sonar_driver">
+    <param name="sonar_ip" value="192.168.12.40" />
+  </node>
+</launch>
