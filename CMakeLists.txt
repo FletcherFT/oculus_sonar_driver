@@ -6,7 +6,8 @@ set( CATKIN_PACKAGES
   std_msgs
   imaging_sonar_msgs
   g3log_catkin
-  active_object )
+  active_object
+)
 
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
@@ -24,7 +25,7 @@ add_compile_options(-std=c++14)
 ###################################
 catkin_package(
   INCLUDE_DIRS
-  LIBRARIES oculus_sonar_lib
+  LIBRARIES oculus_sonar_lib oculus
   CATKIN_DEPENDS ${CATKIN_PACKAGES}
 )
 
@@ -53,7 +54,8 @@ add_library( oculus
              ../liboculus/lib/SonarStatus.cpp
              ../liboculus/lib/DataRx.cpp
              ../liboculus/lib/SonarPlayer.cpp
-             ../liboculus/lib/StatusRx.cpp )
+             ../liboculus/lib/StatusRx.cpp
+             thirdparty/gpmf-parser/GPMF_parser.c )
 target_link_libraries(oculus ${catkin_LIBRARIES})
 
 add_library( oculus_sonar_lib
@@ -71,7 +73,11 @@ target_link_libraries(oculus_sonar_driver oculus_sonar_lib ${catkin_LIBRARIES})
 add_executable(oculus_sonar_playback_driver app/OculusSonarPlaybackNode.cpp)
 target_link_libraries(oculus_sonar_playback_driver oculus_sonar_lib ${catkin_LIBRARIES})
 
-install(TARGETS oculus_sonar_lib oculus oculus_sonar_driver oculus_sonar_playback_driver
+add_executable(oculus_test src/oculus_test.cpp)
+target_link_libraries(oculus_test oculus_sonar_lib ${catkin_LIBRARIES})
+target_link_libraries(oculus_test oculus ${catkin_LIBRARIES})
+
+install(TARGETS oculus_sonar_lib oculus oculus_sonar_driver oculus_sonar_playback_driver oculus_test
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
