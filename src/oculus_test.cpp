@@ -19,7 +19,7 @@ using std::string;
 
 // DataRx recieves pings from the sonar
 #include "liboculus/DataRx.h"
-// IoServiceThread allows for internet communication
+// IoServiceThread allows for network communication
 #include "liboculus/IoServiceThread.h"
 // pretty sure StatusRx validates sonar, might get ip address
 #include "liboculus/StatusRx.h"
@@ -34,7 +34,7 @@ using std::ios_base;
 
 
 // Procsses and publishes sonar pings
-// Not sure if auto datatype is good coding practice
+// Note: Not sure if 'auto' datatype is good coding practice, works fine
 void pingCallback(auto ping, auto oculus_pub) {
   imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
   // from aaron's OculusSonarBase.cpp
@@ -78,6 +78,7 @@ int main(int argc, char **argv) {
 
     ioSrv.fork();
 
+    // run loop while ROS is up, similar to ros::spin()
     while( ros::ok() ) {
       // set up dataRx with correct ip address of sonar
       while( !dataRx ) {
