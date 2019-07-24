@@ -1,9 +1,9 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-// sonar message that aaron made
 #include <cstdlib>
 #include <sstream>
 using std::string;
+// sonar message that aaron made
 #include <imaging_sonar_msgs/ImagingSonarMsg.h>
 // used to get ping info
 #include "liboculus/SimplePingResult.h"
@@ -32,16 +32,49 @@ using std::ios_base;
 // Right now the approach is to basically copy client.cpp from the liboculus library
 // to understand how to wait until a packet is recieved, then publish info
 
+
+// Procsses and publishes sonar pings
+// Not sure if auto datatype is good coding practice
+void pingCallback(auto ping, auto oculus_pub) {
+  imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
+  // from aaron's OculusSonarBase.cpp
+  sonar_msg.header.seq = ping->ping()->pingId;;
+  sonar_msg.header.stamp = ros::Time::now();
+
+  sonar_msg.frequency = ping->ping()->frequency;
+
+  const int nBearings = ping->ping()->nBeams;
+  const int nRanges = ping->ping()->nRanges;
+
+  for( unsigned int b = 0; b < nBearings; b++ ) {
+    sonar_msg.bearings.push_back( ping->bearings().at( b ) );
+  }
+
+  for( unsigned int i = 0; i < nRanges; i++ ) {
+    sonar_msg.ranges.push_back( float(i+0.5) * ping->ping()->rangeResolution );
+  }
+
+  // Oculus data is natively bearing-major, so we need to
+  // reshape it manually.  Too bad.
+  for( unsigned int b = 0; b < nBearings; b++ ) {
+    for( unsigned int r = 0; r < nRanges; r++ ) {
+      sonar_msg.intensities.push_back( ping->image().at(b,r) );
+    }
+  }
+
+  oculus_pub.publish(sonar_msg);
+
+}
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "oculus_node");
   ros::NodeHandle n;
-  //ros::Publisher oculus_pub = ;// to be filled in with custom message info later
+  ros::Publisher oculus_pub = n.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 100);
 
   try {
     IoServiceThread ioSrv;
     std::unique_ptr<StatusRx> statusRx( new StatusRx( ioSrv.service() ) );
     std::unique_ptr<DataRxQueued> dataRx( nullptr );
-
 
     ioSrv.fork();
 
@@ -78,9 +111,9 @@ int main(int argc, char **argv) {
       // dataRx should now be set up, can start doing things with packets
       shared_ptr<SimplePingResult> ping;
       dataRx->queue().wait_and_pop( ping );
-      // just doing basic tests for now
-      // TODO: make a callback method where ping is processed and published
-      std::cout << "Got ping with ID " << ping->ping()->pingId << std::endl;
+
+      // process and publish ping
+      pingCallback(ping, oculus_pub);
 
     }
 
