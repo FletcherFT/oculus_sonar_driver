@@ -5,6 +5,7 @@
 using std::string;
 // sonar message that aaron made
 #include <imaging_sonar_msgs/ImagingSonarMsg.h>
+//#include <oculus_sonar_ros/msg/SonarMsg.h>
 // used to get ping info
 #include "liboculus/SimplePingResult.h"
 
@@ -37,6 +38,7 @@ using std::ios_base;
 // Note: Not sure if 'auto' datatype is good coding practice, works fine
 void pingCallback(auto ping, auto oculus_pub) {
   imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
+  //oculus_sonar_ros::SonarMsg sonar_msg;
   // from aaron's OculusSonarBase.cpp
   sonar_msg.header.seq = ping->ping()->pingId;;
   sonar_msg.header.stamp = ros::Time::now();
@@ -69,8 +71,8 @@ void pingCallback(auto ping, auto oculus_pub) {
 int main(int argc, char **argv) {
   ros::init(argc, argv, "oculus_node");
   ros::NodeHandle n;
+  //ros::Publisher oculus_pub = n.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 100);
   ros::Publisher oculus_pub = n.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 100);
-
   try {
     IoServiceThread ioSrv;
     std::unique_ptr<StatusRx> statusRx( new StatusRx( ioSrv.service() ) );

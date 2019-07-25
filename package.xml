@@ -18,6 +18,7 @@
   <depend>imaging_sonar_msgs</depend>
   <depend>g3log_catkin</depend>
   <depend>active_object</depend>
+  <depend>opencv2</depend>
 
   <export>
   </export>

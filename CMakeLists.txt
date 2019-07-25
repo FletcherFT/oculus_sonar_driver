@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   ${CATKIN_PACKAGES}
 )
 
+
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
 
@@ -26,7 +27,7 @@ add_compile_options(-std=c++14)
 catkin_package(
   INCLUDE_DIRS
   LIBRARIES oculus_sonar_lib oculus
-  CATKIN_DEPENDS ${CATKIN_PACKAGES}
+  CATKIN_DEPENDS opencv2 ${CATKIN_PACKAGES}
 )
 
 
@@ -41,10 +42,12 @@ endif()
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   ../liboculus/include/
   ../liboculus/thirdparty/
   thirdparty/
   include/
+  ../serdp_common/include/
 )
 
 
@@ -65,6 +68,12 @@ add_library( oculus_sonar_lib
              thirdparty/gpmf-parser/GPMF_parser.c )
 target_link_libraries(oculus_sonar_lib oculus ${catkin_LIBRARIES})
 
+add_library( visualization
+             ../serdp_common/lib/DrawSonar.cpp
+             ../serdp_common/lib/OpenCVDisplay.cpp
+             )
+target_link_libraries(oculus_sonar_lib oculus visualization ${catkin_LIBRARIES})
+
 
 ## Build the applications and nodes
 add_executable(oculus_sonar_driver app/OculusSonarNode.cpp)
@@ -75,7 +84,12 @@ target_link_libraries(oculus_sonar_playback_driver oculus_sonar_lib ${catkin_LIB
 
 add_executable(oculus_test src/oculus_test.cpp)
 target_link_libraries(oculus_test oculus_sonar_lib ${catkin_LIBRARIES})
-target_link_libraries(oculus_test oculus ${catkin_LIBRARIES})
+target_link_libraries(oculus_test ${catkin_LIBRARIES})
+
+add_executable(oculus_subscriber src/oculus_subscriber.cpp)
+target_link_libraries(oculus_subscriber oculus_sonar_lib ${catkin_LIBRARIES})
+target_link_libraries(oculus_subscriber oculus ${catkin_LIBRARIES})
+target_link_libraries(oculus_subscriber visualization ${catkin_LIBRARIES})
 
 install(TARGETS oculus_sonar_lib oculus oculus_sonar_driver oculus_sonar_playback_driver oculus_test
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
