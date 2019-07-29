@@ -12,7 +12,10 @@ set( CATKIN_PACKAGES
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
   ${CATKIN_PACKAGES}
+  OpenCV
 )
+
+#find_package( OpenCV REQUIRED )
 
 
 ## Compile as C++11, supported in ROS Kinetic and newer
@@ -82,16 +85,18 @@ target_link_libraries(oculus_sonar_driver oculus_sonar_lib ${catkin_LIBRARIES})
 add_executable(oculus_sonar_playback_driver app/OculusSonarPlaybackNode.cpp)
 target_link_libraries(oculus_sonar_playback_driver oculus_sonar_lib ${catkin_LIBRARIES})
 
-add_executable(oculus_test src/oculus_test.cpp)
-target_link_libraries(oculus_test oculus_sonar_lib ${catkin_LIBRARIES})
-target_link_libraries(oculus_test ${catkin_LIBRARIES})
+add_executable(oculus_publisher src/oculus_publisher.cpp)
+target_link_libraries(oculus_publisher oculus_sonar_lib ${catkin_LIBRARIES})
+target_link_libraries(oculus_publisher ${catkin_LIBRARIES})
 
 add_executable(oculus_subscriber src/oculus_subscriber.cpp)
 target_link_libraries(oculus_subscriber oculus_sonar_lib ${catkin_LIBRARIES})
-target_link_libraries(oculus_subscriber oculus ${catkin_LIBRARIES})
 target_link_libraries(oculus_subscriber visualization ${catkin_LIBRARIES})
 
-install(TARGETS oculus_sonar_lib oculus oculus_sonar_driver oculus_sonar_playback_driver oculus_test
+
+
+
+install(TARGETS oculus_sonar_lib oculus oculus_sonar_driver oculus_sonar_playback_driver oculus_publisher
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
