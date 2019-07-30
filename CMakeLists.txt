@@ -7,16 +7,22 @@ set( CATKIN_PACKAGES
   imaging_sonar_msgs
   g3log_catkin
   active_object
+  rospy
 )
 
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
   ${CATKIN_PACKAGES}
   OpenCV
+  dynamic_reconfigure
+)
+
+# add dynamic reconfigure api
+generate_dynamic_reconfigure_options(
+  cfg/SonarDynamicConfig.cfg
 )
 
 #find_package( OpenCV REQUIRED )
-
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
@@ -88,6 +94,7 @@ target_link_libraries(oculus_sonar_playback_driver oculus_sonar_lib ${catkin_LIB
 add_executable(oculus_publisher src/oculus_publisher.cpp)
 target_link_libraries(oculus_publisher oculus_sonar_lib ${catkin_LIBRARIES})
 target_link_libraries(oculus_publisher ${catkin_LIBRARIES})
+add_dependencies(oculus_publisher ${oculus_sonar_ros}_gencfg)
 
 add_executable(oculus_subscriber src/oculus_subscriber.cpp)
 target_link_libraries(oculus_subscriber oculus_sonar_lib ${catkin_LIBRARIES})

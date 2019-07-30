@@ -8,10 +8,6 @@ using std::string;
 // used to get ping info
 #include "liboculus/SimplePingResult.h"
 
-// inclusions from client.cpp
-//#include <boost/asio.hpp>
-//#include <boost/bind.hpp>
-
 // originally was #include "libg3logger/g3logger.h" but kept getting errors
 #include "/home/tanner/code/oculus_ws/src/libg3logger/include/libg3logger/g3logger.h"
 
@@ -22,25 +18,28 @@ using std::string;
 // pretty sure StatusRx validates sonar, might get ip address
 #include "liboculus/StatusRx.h"
 
-// trying to modify sonar parameters
+// for modifying sonar parameters
 #include "liboculus/SimpleFireMessage.h"
-#include "Oculus/Oculus.h"
+
+// allow dynamic reconfigure of sonar parameters
+#include <dynamic_reconfigure/server.h>
+#include <oculus_sonar_ros/SonarConfig.h>
+#include <thread>
+
 
 using namespace liboculus;
 
-//using std::ofstream;
-//using std::ios_base;
+std::unique_ptr<DataRxQueued> dataRx( nullptr );
 
 // This node is basically the same as running client.cpp from liboculus/tools,
 // just adapted to a ROS publisher node
 
-// Procsses and publish sonar pings to a ROS topic
+// Processes and publishes sonar pings to a ROS topic
 void pingCallback(auto ping, auto oculus_pub) {
   imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
   // from aaron's OculusSonarBase.cpp
   sonar_msg.header.seq = ping->ping()->pingId;;
   sonar_msg.header.stamp = ros::Time::now();
-
   sonar_msg.frequency = ping->ping()->frequency;
 
   const int nBearings = ping->ping()->nBeams;
@@ -63,8 +62,6 @@ void pingCallback(auto ping, auto oculus_pub) {
     }
   }
 */
-
-
   // trying out array of uint8 instead of float32
   // need to push changes to imaging_sonar_msgs
   for( unsigned int b = 0; b < nBearings; b++ ) {
@@ -77,20 +74,45 @@ void pingCallback(auto ping, auto oculus_pub) {
 
 }
 
+void configCallback(oculus_sonar_ros::SonarConfig &config, uint32_t level) {
+
+  if ( dataRx ) {
+    SimpleFireMessage updateFireMsg;
+    updateFireMsg.setRange(config.range);
+    updateFireMsg.setGainPercent(config.gain);
+    updateFireMsg.setGamma(config.gamma);
+    updateFireMsg.setPingRate(config.ping_rate);
+    dataRx->updateFireMessage(updateFireMsg);
+  }
+
+}
+
+void reconfigListener() {
+  dynamic_reconfigure::Server<oculus_sonar_ros::SonarConfig> server;
+  dynamic_reconfigure::Server<oculus_sonar_ros::SonarConfig>::CallbackType f;
+  f = boost::bind(configCallback, _1, _2);
+  server.setCallback(f);
+  ros::spin();
+}
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "oculus_node");
   ros::NodeHandle n;
   ros::Publisher oculus_pub = n.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 1000);
 
+  // need to use threading in order to listen for reconfigure requests
+  // and sonar packets at the same time
+  std::thread thread_obj(reconfigListener);
+
   try {
     IoServiceThread ioSrv;
     std::unique_ptr<StatusRx> statusRx( new StatusRx( ioSrv.service() ) );
-    std::unique_ptr<DataRxQueued> dataRx( nullptr );
 
     ioSrv.fork();
 
     // run loop while ROS is up
     while( ros::ok() ) {
+
       // set up dataRx with correct ip address of sonar
       while( !dataRx ) {
 
@@ -120,12 +142,9 @@ int main(int argc, char **argv) {
           // Failed to get status, try again.
         }
       }
+
       // dataRx should now be set up, can start doing things with packets
       shared_ptr<SimplePingResult> ping;
-      SimpleFireMessage dataFireMessage = dataRx->fireMessage();
-      SimpleFireMessage testFireMsg;
-      //testFireMsg.gammaCorrection = 0;
-      //dataFireMessage._sfm.gammaCorrection = 30;
       dataRx->queue().wait_and_pop( ping );
 
       // process and publish ping
