@@ -62,8 +62,11 @@ void pingCallback(auto ping, auto oculus_pub) {
       sonar_msg.intensities.push_back( ping->image().at(b,r) );
     }
   }
-  */
+*/
+
+
   // trying out array of uint8 instead of float32
+  // need to push changes to imaging_sonar_msgs
   for( unsigned int b = 0; b < nBearings; b++ ) {
     for( unsigned int r = 0; r < nRanges; r++ ) {
       sonar_msg.v2intensities.push_back( ping->image().at(b,r) );
