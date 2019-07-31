@@ -1,0 +1,12 @@
+<!-- Launches oculus_publisher, oculus_subscriber, and dynamic reconfigure gui
+     with default sonar parameters (as defined in SimpleFireMessage.cpp)
+-->
+<launch>
+  <param name="initRange" value="2"/>
+  <param name="initGainPercent" value="50"/>
+  <param name="initGamma" value="127"/>
+  <param name="initPingRate" value="2"/>
+  <node pkg="oculus_sonar_ros" type="oculus_publisher" name="oculus_publisher" output="screen"/>
+  <node pkg="oculus_sonar_ros" type="oculus_subscriber" name="oculus_subscriber"/>
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/>
+</launch>

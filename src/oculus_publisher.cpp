@@ -3,25 +3,22 @@
 #include <cstdlib>
 #include <sstream>
 using std::string;
-// sonar message that aaron made
+// Sonar ROS message that aaron made
 #include <imaging_sonar_msgs/ImagingSonarMsg.h>
-// used to get ping info
+// Used to get sonar ping info
 #include "liboculus/SimplePingResult.h"
-
-// originally was #include "libg3logger/g3logger.h" but kept getting errors
-#include "/home/tanner/code/oculus_ws/src/libg3logger/include/libg3logger/g3logger.h"
 
 // DataRx recieves pings from the sonar
 #include "liboculus/DataRx.h"
 // IoServiceThread allows for network communication
 #include "liboculus/IoServiceThread.h"
-// pretty sure StatusRx validates sonar, might get ip address
+// Pretty sure StatusRx validates sonar, might get ip address
 #include "liboculus/StatusRx.h"
 
-// for modifying sonar parameters
+// For modifying sonar parameters
 #include "liboculus/SimpleFireMessage.h"
 
-// allow dynamic reconfigure of sonar parameters
+// Allow dynamic reconfigure of sonar parameters
 #include <dynamic_reconfigure/server.h>
 #include <oculus_sonar_ros/SonarConfig.h>
 #include <thread>
@@ -69,13 +66,11 @@ void pingCallback(auto ping, auto oculus_pub) {
       sonar_msg.v2intensities.push_back( ping->image().at(b,r) );
     }
   }
-
   oculus_pub.publish(sonar_msg);
-
 }
 
+// Updates sonar parameters
 void configCallback(oculus_sonar_ros::SonarConfig &config, uint32_t level) {
-
   if ( dataRx ) {
     SimpleFireMessage updateFireMsg;
     updateFireMsg.setRange(config.range);
@@ -84,9 +79,9 @@ void configCallback(oculus_sonar_ros::SonarConfig &config, uint32_t level) {
     updateFireMsg.setPingRate(config.ping_rate);
     dataRx->updateFireMessage(updateFireMsg);
   }
-
 }
 
+// Set up dynamic reconfigure server in separate thread
 void reconfigListener() {
   dynamic_reconfigure::Server<oculus_sonar_ros::SonarConfig> server;
   dynamic_reconfigure::Server<oculus_sonar_ros::SonarConfig>::CallbackType f;
@@ -100,20 +95,33 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
   ros::Publisher oculus_pub = n.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 1000);
 
-  // need to use threading in order to listen for reconfigure requests
+  // Need to use threading in order to listen for reconfigure requests
   // and sonar packets at the same time
   std::thread thread_obj(reconfigListener);
+
+  // Setting up initial sonar config according to launch file
+  bool init = true;
+  SimpleFireMessage initialConfig;
+  int initRange, initGainPercent, initGamma, initPingRate;
+    // Get parameter values from launch file.
+    // if no launch file was used, set equal to default values
+  n.param<int>("initRange", initRange, 2);
+  n.param<int>("initGainPercent", initGainPercent, 50);
+  n.param<int>("initGamma", initGamma, 127);
+  n.param<int>("initPingRate", initPingRate, 4);
+    // Set up SimpleFireMessage for initial sonar configuration
+  initialConfig.setRange(initRange);
+  initialConfig.setGainPercent(initGainPercent);
+  initialConfig.setGamma(initGamma);
+  initialConfig.setPingRate(initPingRate);
 
   try {
     IoServiceThread ioSrv;
     std::unique_ptr<StatusRx> statusRx( new StatusRx( ioSrv.service() ) );
-
     ioSrv.fork();
-
-    // run loop while ROS is up
+    // Run loop while ROS is up
     while( ros::ok() ) {
-
-      // set up dataRx with correct ip address of sonar
+      // Set up dataRx with correct ip address of sonar
       while( !dataRx ) {
 
         std::cout << "Need to find the sonar.  Waiting for sonar..." << std::endl;
@@ -125,13 +133,7 @@ int main(int argc, char **argv) {
 
             std::cout << "Using detected sonar at IP address " << addr << std::endl;
 
-            // around here client.cpp has:
-            // if( verbosity > 0 ) statusRx->status().dump()
-            // at lines 36, 37 of client.cpp we have:
-            // int verbosity = 0;
-            // app.add_flag("-v,--verbose", verbosity, "Additional output (use -vv for even more!)");
-            // so I think it is !=0 if -v or -vv is passed. we want it to run in verbose by default
-            statusRx->status().dump();
+            //statusRx->status().dump();
 
             dataRx.reset( new DataRxQueued( ioSrv.service(), addr ) );
 
@@ -142,12 +144,19 @@ int main(int argc, char **argv) {
           // Failed to get status, try again.
         }
       }
+      // DataRx is now working
 
-      // dataRx should now be set up, can start doing things with packets
+      // Set up initial sonar config if this is the first loop
+      if (init) {
+        init = false;
+        dataRx->updateFireMessage(initialConfig);
+      }
+
+      // Wait for pings from sonar
       shared_ptr<SimplePingResult> ping;
       dataRx->queue().wait_and_pop( ping );
 
-      // process and publish ping
+      // Process and publish ping once recieved
       pingCallback(ping, oculus_pub);
 
     }
