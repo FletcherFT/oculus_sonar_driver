@@ -60,7 +60,6 @@ void pingCallback(auto ping, auto oculus_pub) {
   }
 */
   // trying out array of uint8 instead of float32
-  // need to push changes to imaging_sonar_msgs
   for( unsigned int b = 0; b < nBearings; b++ ) {
     for( unsigned int r = 0; r < nRanges; r++ ) {
       sonar_msg.v2intensities.push_back( ping->image().at(b,r) );
@@ -77,6 +76,7 @@ void configCallback(oculus_sonar_ros::SonarConfig &config, uint32_t level) {
     updateFireMsg.setGainPercent(config.gain);
     updateFireMsg.setGamma(config.gamma);
     updateFireMsg.setPingRate(config.ping_rate);
+    updateFireMsg.setMasterMode(config.master_mode);
     dataRx->updateFireMessage(updateFireMsg);
   }
 }
@@ -102,18 +102,20 @@ int main(int argc, char **argv) {
   // Setting up initial sonar config according to launch file
   bool init = true;
   SimpleFireMessage initialConfig;
-  int initRange, initGainPercent, initGamma, initPingRate;
+  int initRange, initGainPercent, initGamma, initPingRate, initMasterMode;
     // Get parameter values from launch file.
     // if no launch file was used, set equal to default values
   n.param<int>("initRange", initRange, 2);
   n.param<int>("initGainPercent", initGainPercent, 50);
   n.param<int>("initGamma", initGamma, 127);
   n.param<int>("initPingRate", initPingRate, 4);
+  n.param<int>("initMasterMode", initMasterMode, 2);
     // Set up SimpleFireMessage for initial sonar configuration
   initialConfig.setRange(initRange);
   initialConfig.setGainPercent(initGainPercent);
   initialConfig.setGamma(initGamma);
   initialConfig.setPingRate(initPingRate);
+  initialConfig.setMasterMode(initMasterMode);
 
   try {
     IoServiceThread ioSrv;
