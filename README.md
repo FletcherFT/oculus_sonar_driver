@@ -1,4 +1,4 @@
-#oculus_sonar_ros
+# oculus_sonar_ros
 ROS nodes that uses [liboculus](https://github.com/apl-ocean-engineering/liboculus) to publish sonar data to ROS topics.
 
 ## Installation
