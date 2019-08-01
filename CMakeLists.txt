@@ -10,6 +10,8 @@ set( CATKIN_PACKAGES
   rospy
 )
 
+set(OpenCV_DIR /usr/share/OpenCV/)
+
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
   ${CATKIN_PACKAGES}
