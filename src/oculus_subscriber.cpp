@@ -1,8 +1,8 @@
 #include "ros/ros.h"
 #include "imaging_sonar_msgs/ImagingSonarMsg.h"
-#include <opencv2/core.hpp>
-#include <opencv2/opencv.hpp>
-#include <opencv2/imgproc.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 using namespace std;
 using namespace cv;
