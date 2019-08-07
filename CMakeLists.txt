@@ -26,6 +26,7 @@ generate_dynamic_reconfigure_options(
 
 #find_package( OpenCV REQUIRED )
 
+
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
 
@@ -98,6 +99,7 @@ add_executable(oculus_publisher src/oculus_publisher.cpp)
 target_link_libraries(oculus_publisher oculus_sonar_lib ${catkin_LIBRARIES})
 target_link_libraries(oculus_publisher ${catkin_LIBRARIES})
 add_dependencies(oculus_publisher ${oculus_sonar_ros}_gencfg)
+add_dependencies(oculus_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_executable(oculus_subscriber src/oculus_subscriber.cpp)
 target_link_libraries(oculus_subscriber oculus_sonar_lib ${catkin_LIBRARIES})

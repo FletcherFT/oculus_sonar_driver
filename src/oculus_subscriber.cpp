@@ -43,9 +43,9 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
     if( b == 0 ) {
 
        // originally: end = (ping->bearings().at(b+1) + ping->bearings().at(b))/2.0;
-       end = (msg.bearings[b+1] + msg.bearings[b])/2.0;
+       end = (msg.bearings[b+1] + msg.bearings[b]) / 2.0;
        // originally: begin = 2*ping->bearings().at(b) - end;
-       begin = 2*msg.bearings[b] - end;
+       begin = 2 * msg.bearings[b] - end;
 
     } else if ( b == nBeams-1 ) {
 
@@ -69,23 +69,23 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
   for( unsigned int r = 0; r < nRanges; ++r ) {
     for( unsigned int b = 0; b < nBeams; ++b ) {
 
-      // originally: auto intensity = ping->image().at( b, r );
+    // originally: auto intensity = ping->image().at( b, r );
       auto intensity = msg.v2intensities[(r * nBeams) + b];
-      //auto intensity = msg.intensities[(r * nBeams) + b];
-      // Insert color mapping here
+    //auto intensity = msg.intensities[(r * nBeams) + b];
+    // Insert color mapping here
       cv::Scalar color( intensity, intensity, intensity );
 
       const float begin = angles[b].first+270, end= angles[b].second+270;
 
-      //LOG_IF( DEBUG, r == 128 ) << "From " << begin << " to " << end << "; color " << color;
+    //LOG_IF( DEBUG, r == 128 ) << "From " << begin << " to " << end << "; color " << color;
 
       const float rad = float(radius * r) / nRanges;
 
       const float fudge=0.7;
 
-      // Assume angles are in image frame x-right, y-down
+    // Assume angles are in image frame x-right, y-down
       cv::ellipse( mat, origin, cv::Size(rad, rad), 0,
-                  begin-fudge, end+fudge, color, binThickness*1.4 );
+                begin-fudge, end+fudge, color, binThickness*1.4 );
     }
   }
 
