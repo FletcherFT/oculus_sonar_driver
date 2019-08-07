@@ -20,7 +20,7 @@ using std::string;
 
 // Allow dynamic reconfigure of sonar parameters
 #include <dynamic_reconfigure/server.h>
-#include <oculus_sonar_ros/SonarConfig.h>
+#include <oculus_sonar_ros/OculusSonarConfig.h>
 #include <thread>
 
 
@@ -69,7 +69,7 @@ void pingCallback(auto ping, auto oculus_pub) {
 }
 
 // Updates sonar parameters
-void configCallback(oculus_sonar_ros::SonarConfig &config, uint32_t level) {
+void configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level) {
   if ( dataRx ) {
     SimpleFireMessage updateFireMsg;
     updateFireMsg.setRange(config.range);
@@ -83,8 +83,8 @@ void configCallback(oculus_sonar_ros::SonarConfig &config, uint32_t level) {
 
 // Set up dynamic reconfigure server in separate thread
 void reconfigListener() {
-  dynamic_reconfigure::Server<oculus_sonar_ros::SonarConfig> server;
-  dynamic_reconfigure::Server<oculus_sonar_ros::SonarConfig>::CallbackType f;
+  dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
+  dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
   f = boost::bind(configCallback, _1, _2);
   server.setCallback(f);
   ros::spin();
