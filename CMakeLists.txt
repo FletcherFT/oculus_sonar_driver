@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 # add dynamic reconfigure api
 generate_dynamic_reconfigure_options(
-  cfg/SonarDynamicConfig.cfg
+  cfg/OculusSonar.cfg
 )
 
 #find_package( OpenCV REQUIRED )
@@ -68,6 +68,7 @@ add_library( oculus
              ../liboculus/lib/SonarStatus.cpp
              ../liboculus/lib/DataRx.cpp
              ../liboculus/lib/SonarPlayer.cpp
+             ../liboculus/lib/GpmfSonarPlayer.cpp
              ../liboculus/lib/StatusRx.cpp
              thirdparty/gpmf-parser/GPMF_parser.c )
 target_link_libraries(oculus ${catkin_LIBRARIES})
