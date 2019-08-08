@@ -30,8 +30,8 @@ using namespace liboculus;
 class OculusPublisher {
 
   std::unique_ptr<DataRxQueued> dataRx_;
-  ros::NodeHandle n_;
   ros::Publisher oculus_pub_;
+  int initRange, initGainPercent, initGamma, initPingRate, initMasterMode;
 
 
 public:
@@ -44,5 +44,6 @@ public:
   void pingCallback(auto ping);
   void configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level);
   void reconfigListener();
+  void loop();
 
 };

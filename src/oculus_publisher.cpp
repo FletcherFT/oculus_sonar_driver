@@ -58,32 +58,20 @@ void OculusPublisher::configCallback(oculus_sonar_ros::OculusSonarConfig &config
 void OculusPublisher::reconfigListener() {
   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
-  f = boost::bind(this->configCallback, _1, _2);
+  f = boost::bind(&OculusPublisher::configCallback, this, _1, _2);
   server.setCallback(f);
   ros::spin();
 }
 
-OculusPublisher::OculusPublisher(int argc, char **argv) : dataRx_( nullptr ) {
-  ros::init(argc, argv, "oculus_node");
-  oculus_pub_ = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 1000);
-  std::thread thread_obj(this->reconfigListener);
+void OculusPublisher::loop() {
   bool init = true;
   SimpleFireMessage initialConfig;
-  int initRange, initGainPercent, initGamma, initPingRate, initMasterMode;
-    // Get parameter values from launch file.
-    // if no launch file was used, set equal to default values
-  n_.param<int>("initRange", initRange, 2);
-  n_.param<int>("initGainPercent", initGainPercent, 50);
-  n_.param<int>("initGamma", initGamma, 127);
-  n_.param<int>("initPingRate", initPingRate, 2);
-  n_.param<int>("initMasterMode", initMasterMode, 2);
     // Set up SimpleFireMessage for initial sonar configuration
   initialConfig.setRange(initRange);
   initialConfig.setGainPercent(initGainPercent);
   initialConfig.setGamma(initGamma);
   initialConfig.setPingRate(initPingRate);
   initialConfig.setMasterMode(initMasterMode);
-
   try {
     IoServiceThread ioSrv;
     std::unique_ptr<StatusRx> statusRx( new StatusRx( ioSrv.service() ) );
@@ -136,7 +124,21 @@ OculusPublisher::OculusPublisher(int argc, char **argv) : dataRx_( nullptr ) {
   catch (std::exception& e) {
     std::cout << "Exception: " << e.what();
   }
+}
 
+OculusPublisher::OculusPublisher(int argc, char **argv) : dataRx_( nullptr ) {
+  ros::init(argc, argv, "oculus_node");
+  ros::NodeHandle n_;
+  oculus_pub_ = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 1000);
+  std::thread thread_obj(std::bind(&OculusPublisher::reconfigListener, this));
+    // Get parameter values from launch file.
+    // if no launch file was used, set equal to default values
+  n_.param<int>("initRange", initRange, 2);
+  n_.param<int>("initGainPercent", initGainPercent, 50);
+  n_.param<int>("initGamma", initGamma, 127);
+  n_.param<int>("initPingRate", initPingRate, 2);
+  n_.param<int>("initMasterMode", initMasterMode, 2);
+  this->loop();
 }
 
 OculusPublisher::~OculusPublisher() {
