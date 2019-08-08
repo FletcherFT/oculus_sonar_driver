@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(oculus_sonar_ros)
 
 set( CATKIN_PACKAGES
+  cv_bridge
   roscpp
   std_msgs
   imaging_sonar_msgs

@@ -7,10 +7,17 @@
 using namespace std;
 using namespace cv;
 
-// Subscribes to sonar message topic, displays using opencv
+// For uploading drawn sonar images to Image topic
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+// Subscribes to sonar message topic, draws using opencv then publishes result
+
+int counter;
+ros::Publisher oculus_drawn_pub;
 
 // draw sonar using ImagingSonarMsg rather than a SimplePingResult
-void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
+void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg ) {
 
   int nRanges = msg.ranges.size();
   int nBeams = msg.bearings.size();
@@ -89,8 +96,20 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
     }
   }
 
-  cv::imshow("ROS sonar", mat);
-  cv::waitKey(1);
+  //cv::imshow("ROS sonar", mat);
+  //cv::waitKey(1);
+
+  // Convert and publish drawn sonar images
+  std_msgs::Header header;
+  header.seq = counter;
+  header.stamp = ros::Time::now();
+
+  cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8, mat);
+
+  sensor_msgs::Image output_msg;
+  img_bridge.toImageMsg(output_msg);
+  oculus_drawn_pub.publish(output_msg);
+  counter++;
 }
 
 /*
@@ -104,7 +123,13 @@ void msgCallback(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
 int main(int argc, char **argv) {
   ros::init(argc, argv, "oculus_sub");
   ros::NodeHandle n;
+
+  oculus_drawn_pub = n.advertise<sensor_msgs::Image>("drawn_sonar", 100);
+
+//  ros::Subscriber sub = n.subscribe("sonar_info", 100, std::bind(&drawSonar, std::placeholders::_1, oculus_drawn_pub));
   ros::Subscriber sub = n.subscribe("sonar_info", 100, drawSonar);
+
+  counter = 0;
   ros::spin();
   return 0;
 }
