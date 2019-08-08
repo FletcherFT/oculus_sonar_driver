@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
   n.param<int>("initRange", initRange, 2);
   n.param<int>("initGainPercent", initGainPercent, 50);
   n.param<int>("initGamma", initGamma, 127);
-  n.param<int>("initPingRate", initPingRate, 4);
+  n.param<int>("initPingRate", initPingRate, 2);
   n.param<int>("initMasterMode", initMasterMode, 2);
     // Set up SimpleFireMessage for initial sonar configuration
   initialConfig.setRange(initRange);
