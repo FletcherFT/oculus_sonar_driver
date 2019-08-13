@@ -12,6 +12,7 @@ set( CATKIN_PACKAGES
   liboculus REQUIRED
   rospy
   serdp_common
+  serdp_player
   gpmf
 )
 
