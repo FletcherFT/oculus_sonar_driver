@@ -7,10 +7,17 @@
 using namespace std;
 using namespace cv;
 
-// Subscribes to sonar message topic, displays using opencv
+// For uploading drawn sonar images to Image topic
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
+
+// Subscribes to sonar message topic, draws using opencv then publishes result
+
+int counter;
+ros::Publisher oculus_drawn_pub;
 
 // draw sonar using ImagingSonarMsg rather than a SimplePingResult
-void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
+void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg ) {
 
   int nRanges = msg.ranges.size();
   int nBeams = msg.bearings.size();
@@ -43,9 +50,9 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
     if( b == 0 ) {
 
        // originally: end = (ping->bearings().at(b+1) + ping->bearings().at(b))/2.0;
-       end = (msg.bearings[b+1] + msg.bearings[b])/2.0;
+       end = (msg.bearings[b+1] + msg.bearings[b]) / 2.0;
        // originally: begin = 2*ping->bearings().at(b) - end;
-       begin = 2*msg.bearings[b] - end;
+       begin = 2 * msg.bearings[b] - end;
 
     } else if ( b == nBeams-1 ) {
 
@@ -69,28 +76,40 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
   for( unsigned int r = 0; r < nRanges; ++r ) {
     for( unsigned int b = 0; b < nBeams; ++b ) {
 
-      // originally: auto intensity = ping->image().at( b, r );
+    // originally: auto intensity = ping->image().at( b, r );
       auto intensity = msg.v2intensities[(r * nBeams) + b];
-      //auto intensity = msg.intensities[(r * nBeams) + b];
-      // Insert color mapping here
+    //auto intensity = msg.intensities[(r * nBeams) + b];
+    // Insert color mapping here
       cv::Scalar color( intensity, intensity, intensity );
 
       const float begin = angles[b].first+270, end= angles[b].second+270;
 
-      //LOG_IF( DEBUG, r == 128 ) << "From " << begin << " to " << end << "; color " << color;
+    //LOG_IF( DEBUG, r == 128 ) << "From " << begin << " to " << end << "; color " << color;
 
       const float rad = float(radius * r) / nRanges;
 
       const float fudge=0.7;
 
-      // Assume angles are in image frame x-right, y-down
+    // Assume angles are in image frame x-right, y-down
       cv::ellipse( mat, origin, cv::Size(rad, rad), 0,
-                  begin-fudge, end+fudge, color, binThickness*1.4 );
+                begin-fudge, end+fudge, color, binThickness*1.4 );
     }
   }
 
-  cv::imshow("ROS sonar", mat);
-  cv::waitKey(1);
+  //cv::imshow("ROS sonar", mat);
+  //cv::waitKey(1);
+
+  // Convert and publish drawn sonar images
+  std_msgs::Header header;
+  header.seq = counter;
+  header.stamp = ros::Time::now();
+
+  cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8, mat);
+
+  sensor_msgs::Image output_msg;
+  img_bridge.toImageMsg(output_msg);
+  oculus_drawn_pub.publish(output_msg);
+  counter++;
 }
 
 /*
@@ -104,7 +123,13 @@ void msgCallback(const imaging_sonar_msgs::ImagingSonarMsg& msg) {
 int main(int argc, char **argv) {
   ros::init(argc, argv, "oculus_sub");
   ros::NodeHandle n;
+
+  oculus_drawn_pub = n.advertise<sensor_msgs::Image>("drawn_sonar", 100);
+
+//  ros::Subscriber sub = n.subscribe("sonar_info", 100, std::bind(&drawSonar, std::placeholders::_1, oculus_drawn_pub));
   ros::Subscriber sub = n.subscribe("sonar_info", 100, drawSonar);
+
+  counter = 0;
   ros::spin();
   return 0;
 }

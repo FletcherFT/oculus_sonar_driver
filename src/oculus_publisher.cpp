@@ -23,7 +23,6 @@ using std::string;
 #include <oculus_sonar_ros/OculusSonarConfig.h>
 #include <thread>
 
-
 using namespace liboculus;
 
 std::unique_ptr<DataRxQueued> dataRx( nullptr );
@@ -33,6 +32,7 @@ std::unique_ptr<DataRxQueued> dataRx( nullptr );
 
 // Processes and publishes sonar pings to a ROS topic
 void pingCallback(auto ping, auto oculus_pub) {
+
   imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
   // from aaron's OculusSonarBase.cpp
   sonar_msg.header.seq = ping->ping()->pingId;;
@@ -60,8 +60,8 @@ void pingCallback(auto ping, auto oculus_pub) {
   }
 */
   // trying out array of uint8 instead of float32
-  for( unsigned int b = 0; b < nBearings; b++ ) {
-    for( unsigned int r = 0; r < nRanges; r++ ) {
+  for( unsigned int r = 0; r < nRanges; r++ ) {
+    for( unsigned int b = 0; b < nBearings; b++ ) {
       sonar_msg.v2intensities.push_back( ping->image().at(b,r) );
     }
   }
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
   n.param<int>("initRange", initRange, 2);
   n.param<int>("initGainPercent", initGainPercent, 50);
   n.param<int>("initGamma", initGamma, 127);
-  n.param<int>("initPingRate", initPingRate, 4);
+  n.param<int>("initPingRate", initPingRate, 2);
   n.param<int>("initMasterMode", initMasterMode, 2);
     // Set up SimpleFireMessage for initial sonar configuration
   initialConfig.setRange(initRange);

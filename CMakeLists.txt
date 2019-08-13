@@ -4,6 +4,7 @@ project(oculus_sonar_ros)
 #add_compile_options(-std=c++14)
 
 set( CATKIN_PACKAGES
+  cv_bridge
   roscpp
   std_msgs
   imaging_sonar_msgs
@@ -24,8 +25,8 @@ find_package(catkin REQUIRED COMPONENTS
   ${CATKIN_PACKAGES}
   OpenCV
   dynamic_reconfigure
-  
-  
+
+
 )
 
 #add dynamic reconfigure api
@@ -33,7 +34,11 @@ generate_dynamic_reconfigure_options(
   cfg/OculusSonar.cfg
 )
 
-find_package( OpenCV REQUIRED )
+#find_package( OpenCV REQUIRED )
+
+
+## Compile as C++11, supported in ROS Kinetic and newer
+add_compile_options(-std=c++14)
 
 
 catkin_package(
@@ -72,18 +77,3 @@ add_dependencies(oculus_publisher ${oculus_sonar_ros}_gencfg )
 
 add_executable(oculus_subscriber src/oculus_subscriber.cpp)
 target_link_libraries(oculus_subscriber oculus_sonar_lib ${catkin_LIBRARIES})
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

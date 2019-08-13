@@ -15,7 +15,7 @@
   <exec_depend>roscpp</exec_depend>
 
   <depend>rospy</depend>
-
+  <depend>cv_bridge</depend>
   <depend>std_msgs</depend>
   <depend>imaging_sonar_msgs</depend>
   <depend>g3log_catkin</depend>
