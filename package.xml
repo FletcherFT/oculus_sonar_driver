@@ -23,6 +23,7 @@
   <depend>liboculus</depend>
   <depend>serdp_common</depend>
   <depend>opencv2</depend>
+  <depend>gpmf</depend>
 
   <export>
   </export>

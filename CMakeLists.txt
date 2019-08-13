@@ -12,6 +12,7 @@ set( CATKIN_PACKAGES
   liboculus REQUIRED
   rospy
   serdp_common
+  gpmf
 )
 
 set(OpenCV_DIR /usr/share/OpenCV/)
@@ -36,7 +37,7 @@ find_package( OpenCV REQUIRED )
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS liboculus g3log_catkin active_object serdp_common 
+  CATKIN_DEPENDS liboculus g3log_catkin active_object serdp_common gpmf
 )
 
 
