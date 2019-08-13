@@ -20,7 +20,11 @@
   <depend>imaging_sonar_msgs</depend>
   <depend>g3log_catkin</depend>
   <depend>active_object</depend>
+  <depend>liboculus</depend>
+  <depend>serdp_common</depend>
+  <depend>serdp_player</depend>
   <depend>opencv2</depend>
+  <depend>gpmf</depend>
 
   <export>
   </export>
