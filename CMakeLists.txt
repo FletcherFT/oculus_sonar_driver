@@ -56,24 +56,24 @@ include_directories(
 )
 
 
-add_library( oculus_sonar_lib
-             lib/OculusSonarBase.cpp
-             lib/OculusSonarPlayback.cpp
-             lib/OculusSonarReal.cpp)
+#add_library( oculus_sonar_lib
+             #lib/OculusSonarBase.cpp)
+             #lib/OculusSonarPlayback.cpp)
+             #lib/OculusSonarReal.cpp)
              #thirdparty/gpmf-parser/GPMF_parser.c )
 
-target_link_libraries(oculus_sonar_lib ${catkin_LIBRARIES})
+#target_link_libraries(oculus_sonar_lib ${catkin_LIBRARIES})
 
-add_executable(oculus_sonar_driver app/OculusSonarNode.cpp)
-target_link_libraries(oculus_sonar_driver oculus_sonar_lib ${catkin_LIBRARIES} ${liboculus_catkin_LIBRARIES})
+#add_executable(oculus_sonar_driver app/OculusSonarNode.cpp)
+#target_link_libraries(oculus_sonar_driver  ${catkin_LIBRARIES} ${liboculus_catkin_LIBRARIES})
 
-add_executable(oculus_sonar_playback_driver app/OculusSonarPlaybackNode.cpp)
-target_link_libraries(oculus_sonar_playback_driver oculus_sonar_lib ${catkin_LIBRARIES})
+#add_executable(oculus_sonar_playback_driver app/OculusSonarPlaybackNode.cpp)
+#target_link_libraries(oculus_sonar_playback_driver  ${catkin_LIBRARIES})
 
 add_executable(oculus_publisher src/oculus_publisher.cpp)
-target_link_libraries(oculus_publisher oculus_sonar_lib ${catkin_LIBRARIES})
+target_link_libraries(oculus_publisher  ${catkin_LIBRARIES})
 
 add_dependencies(oculus_publisher ${oculus_sonar_ros}_gencfg )
 
 add_executable(oculus_subscriber src/oculus_subscriber.cpp)
-target_link_libraries(oculus_subscriber oculus_sonar_lib ${catkin_LIBRARIES})
+target_link_libraries(oculus_subscriber  ${catkin_LIBRARIES})
