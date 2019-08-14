@@ -36,14 +36,14 @@ class OculusPublisher {
 
 public:
 
-  OculusPublisher(int argc, char **argv);
+  OculusPublisher();
   ~OculusPublisher();
 
   // will have publisher, dataRx, statusRx, all as class fields
   // -> don't need to pass things in methods
-  void pingCallback(auto ping);
+  void pingCallback(shared_ptr<SimplePingResult> ping);
   void configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level);
   void reconfigListener();
-  void loop();
+  void run();
 
 };

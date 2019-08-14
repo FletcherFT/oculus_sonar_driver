@@ -34,9 +34,6 @@ generate_dynamic_reconfigure_options(
   cfg/OculusSonar.cfg
 )
 
-#find_package( OpenCV REQUIRED )
-
-
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
 
@@ -54,21 +51,6 @@ include_directories(
   thirdparty/
   include/
 )
-
-
-#add_library( oculus_sonar_lib
-             #lib/OculusSonarBase.cpp)
-             #lib/OculusSonarPlayback.cpp)
-             #lib/OculusSonarReal.cpp)
-             #thirdparty/gpmf-parser/GPMF_parser.c )
-
-#target_link_libraries(oculus_sonar_lib ${catkin_LIBRARIES})
-
-#add_executable(oculus_sonar_driver app/OculusSonarNode.cpp)
-#target_link_libraries(oculus_sonar_driver  ${catkin_LIBRARIES} ${liboculus_catkin_LIBRARIES})
-
-#add_executable(oculus_sonar_playback_driver app/OculusSonarPlaybackNode.cpp)
-#target_link_libraries(oculus_sonar_playback_driver  ${catkin_LIBRARIES})
 
 add_executable(oculus_publisher src/oculus_publisher.cpp)
 target_link_libraries(oculus_publisher  ${catkin_LIBRARIES})
