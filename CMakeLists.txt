@@ -43,8 +43,6 @@ catkin_package(
   CATKIN_DEPENDS liboculus g3log_catkin active_object serdp_common gpmf
 )
 
-
-
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
@@ -52,8 +50,12 @@ include_directories(
   include/
 )
 
+file(GLOB blackmagic_SRCS
+    lib/*.cpp
+)
+
 add_executable(oculus_publisher src/oculus_publisher.cpp)
-target_link_libraries(oculus_publisher  ${catkin_LIBRARIES})
+target_link_libraries(oculus_publisher ${catkin_LIBRARIES})
 
 add_dependencies(oculus_publisher ${oculus_sonar_ros}_gencfg )
 
