@@ -9,7 +9,7 @@
 OculusPublisher::OculusPublisher() : dataRx_( nullptr ) {
   ros::NodeHandle n_;
   oculus_pub_ = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 1000);
-  std::thread thread_obj(std::bind(&OculusPublisher::reconfigListener, this));
+  //std::thread thread_obj(std::bind(&OculusPublisher::reconfigListener, this));
   // Get parameter values from launch file.
   // if no launch file was used, set equal to default values
   n_.param<int>("initRange", initRange, 2);
@@ -18,7 +18,19 @@ OculusPublisher::OculusPublisher() : dataRx_( nullptr ) {
   n_.param<int>("initPingRate", initPingRate, 2);
   n_.param<int>("initMasterMode", initMasterMode, 2);
 
-  run();
+
+  LOG(WARNING) << "ping" << initPingRate;
+
+    // Set up SimpleFireMessage for initial sonar configuration
+  initialConfig.setRange(initRange);
+  initialConfig.setGainPercent(initGainPercent);
+  initialConfig.setGamma(initGamma);
+  initialConfig.setPingRate(initPingRate);
+  initialConfig.setMasterMode(initMasterMode);
+
+  updateFireMsg = initialConfig;
+
+  //run();
 }
 
 OculusPublisher::~OculusPublisher() {
@@ -57,8 +69,8 @@ void OculusPublisher::pingCallback(shared_ptr<SimplePingResult> ping) {
 // Updates sonar parameters
 void OculusPublisher::configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level) {
   if ( dataRx_ ) {
-    SimpleFireMessage updateFireMsg;
-    updateFireMsg.setRange(config.range);
+
+    updateFireMsg.setRange( config.range);
     updateFireMsg.setGainPercent(config.gain);
     updateFireMsg.setGamma(config.gamma);
     updateFireMsg.setPingRate(config.ping_rate);
@@ -67,24 +79,17 @@ void OculusPublisher::configCallback(oculus_sonar_ros::OculusSonarConfig &config
   }
 }
 
-// Set up dynamic reconfigure server in separate thread
-void OculusPublisher::reconfigListener() {
-  dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
-  dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
-  f = boost::bind(&OculusPublisher::configCallback, this, _1, _2);
-  server.setCallback(f);
-  ros::spin();
-}
+// // Set up dynamic reconfigure server in separate thread
+// void OculusPublisher::reconfigListener() {
+//   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
+//   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
+//   f = boost::bind(&OculusPublisher::configCallback, this, _1, _2);
+//   server.setCallback(f);
+//   ros::spin();
+// }
 
 void OculusPublisher::run() {
   bool init = true;
-  SimpleFireMessage initialConfig;
-    // Set up SimpleFireMessage for initial sonar configuration
-  initialConfig.setRange(initRange);
-  initialConfig.setGainPercent(initGainPercent);
-  initialConfig.setGamma(initGamma);
-  initialConfig.setPingRate(initPingRate);
-  initialConfig.setMasterMode(initMasterMode);
   try {
     IoServiceThread ioSrv;
     std::unique_ptr<StatusRx> statusRx( new StatusRx( ioSrv.service() ) );
@@ -127,6 +132,7 @@ void OculusPublisher::run() {
 
       // Process and publish ping once recieved
       this->pingCallback(ping);
+      ros::spinOnce();
 
     }
 
@@ -144,7 +150,16 @@ int main(int argc, char **argv) {
   logWorker.verbose(2);
 
   ros::init(argc, argv, "oculus_node");
+
+   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
+   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
+
   OculusPublisher oculus_pub_node;
+   f = boost::bind(&OculusPublisher::configCallback, &oculus_pub_node, _1, _2);
+   server.setCallback(f);
+
+
+  oculus_pub_node.run();
 
   return 0;
 }

@@ -90,7 +90,7 @@
                 },
                 "mouse_pub_topic": {
                   "type": "repr",
-                  "repr": "u'/camera1_mouse_left'"
+                  "repr": "u'/camera_right_mouse_left'"
                 },
                 "num_gridlines": {
                   "type": "repr",
@@ -110,7 +110,7 @@
                 },
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/camera1'"
+                  "repr": "u'/camera_right'"
                 },
                 "publish_click_location": {
                   "type": "repr",
@@ -261,7 +261,7 @@
                 },
                 "mouse_pub_topic": {
                   "type": "repr",
-                  "repr": "u'/camera0_mouse_left'"
+                  "repr": "u'/camera_left_mouse_left'"
                 },
                 "num_gridlines": {
                   "type": "repr",
@@ -281,7 +281,7 @@
                 },
                 "topic": {
                   "type": "repr",
-                  "repr": "u'/camera0'"
+                  "repr": "u'/camera_left'"
                 },
                 "publish_click_location": {
                   "type": "repr",

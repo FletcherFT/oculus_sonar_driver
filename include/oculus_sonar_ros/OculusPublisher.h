@@ -32,6 +32,8 @@ class OculusPublisher {
   std::unique_ptr<DataRxQueued> dataRx_;
   ros::Publisher oculus_pub_;
   int initRange, initGainPercent, initGamma, initPingRate, initMasterMode;
+  SimpleFireMessage initialConfig;
+  SimpleFireMessage updateFireMsg;
 
 
 public:
