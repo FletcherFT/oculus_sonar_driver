@@ -44,20 +44,24 @@ catkin_package(
 )
 
 include_directories(
-  ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   thirdparty/
   include/
+  ${catkin_INCLUDE_DIRS}
 )
 
-file(GLOB blackmagic_SRCS
-    lib/*.cpp
-)
 
 add_executable(oculus_publisher src/oculus_publisher.cpp)
 target_link_libraries(oculus_publisher ${catkin_LIBRARIES})
-
 add_dependencies(oculus_publisher ${oculus_sonar_ros}_gencfg )
 
 add_executable(oculus_subscriber src/oculus_subscriber.cpp)
 target_link_libraries(oculus_subscriber  ${catkin_LIBRARIES})
+
+install(TARGETS oculus_publisher oculus_subscriber
+	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+
+install( DIRECTORY launch/
+         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch )
