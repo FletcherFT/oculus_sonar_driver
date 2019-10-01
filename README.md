@@ -1,6 +1,8 @@
 # oculus_sonar_ros
 ROS nodes that use [liboculus](https://github.com/apl-ocean-engineering/liboculus) to publish sonar data to ROS topics.
-Currently runs on ROS Melodic, Ubuntu 18.04
+Currently runs on ROS Melodic, Ubuntu 18.04  
+
+NOTE: Images are scaled by SCALE_FACTOR, a macro defaulted to 250 (to help with display)  
 
 ## Installation
   1. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [active_object](https://gitlab.com/apl-ocean-engineering/hmi-lsd-slam-transition/active_object), [imaging_sonar_msgs](https://gitlab.com/apl-ocean-engineering/imaging_sonar_msgs), and [g3log_catkin](https://gitlab.com/apl-ocean-engineering/lsd-slam/g3log_catkin) to <catkin_ws>/src

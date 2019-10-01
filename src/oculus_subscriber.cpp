@@ -102,6 +102,7 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg &msg) {
       auto intensity = msg.v2intensities[(r * nBeams) + b];
       // Insert color mapping here
       // cv::Scalar color(intensity, intensity, intensity);
+      // SCALE_FACTOR is a macro set to 250 initally to help with display
       cv::Scalar color(bearing * SCALE_FACTOR, range * SCALE_FACTOR,
                        intensity * SCALE_FACTOR);
 
