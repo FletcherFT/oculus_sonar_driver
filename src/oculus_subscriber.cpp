@@ -17,6 +17,7 @@ using namespace cv;
 
 #include "g3_to_ros_logger/ROSLogSink.h"
 #include "g3_to_ros_logger/g3logger.h"
+#include <iostream>
 
 // Subscribes to sonar message topic, draws using opencv then publishes result
 
@@ -34,9 +35,9 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg &msg) {
   // seems like bearings().at(x) is a 1D array, translates to values in
   // msg.bearings image.at(x,y) is a 2D array, maps to values in msg.intensities
 
-  cv::Mat mat(500, 1000, CV_8UC3);
+  cv::Mat mat(500, 1000, CV_16SC3);
   mat.setTo(cv::Vec3b(128, 128, 128));
-  mat.create(mat.size(), CV_8UC3);
+  mat.create(mat.size(), CV_16SC3);
 
   const unsigned int radius = mat.size().width / 2;
   const cv::Point origin(radius, mat.size().height);
@@ -94,10 +95,15 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg &msg) {
 
       float bearing = bearings.at(b);
       float range = ranges.at(r);
+
+      // std::cout << "bearing: " << bearing << std::endl;
+      // std::cout << "range: " << range << std::endl;
+
       auto intensity = msg.v2intensities[(r * nBeams) + b];
       // Insert color mapping here
       // cv::Scalar color(intensity, intensity, intensity);
-      cv::Scalar color(bearing, range, intensity);
+      cv::Scalar color(bearing * SCALE_FACTOR, range * SCALE_FACTOR,
+                       intensity * SCALE_FACTOR);
 
       const float begin = angles[b].first + 270, end = angles[b].second + 270;
 
@@ -122,7 +128,7 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg &msg) {
   header.seq = counter;
   header.stamp = ros::Time::now();
 
-  cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8,
+  cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR16,
                                 mat);
 
   sensor_msgs::Image output_msg;
