@@ -18,6 +18,17 @@ set( CATKIN_PACKAGES
 )
 
 set(OpenCV_DIR /usr/share/OpenCV/)
+set( PI "3.14159265358979")
+
+add_definitions( -DPI=${PI} )
+
+OPTION(THETA_SHIFT_DEGREES "Define " ON) # Enabled by default
+if(THETA_SHIFT_DEGREES)
+	add_definitions( -DTHETA_SHIFT=90 )
+else()
+	add_definitions( -DTHETA_SHIFT=${PI} )
+endif()
+
 
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS

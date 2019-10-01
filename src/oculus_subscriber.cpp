@@ -4,6 +4,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#ifndef THETA_SHIFT
+#define THETA_SHIFT PI;
+#endif
+
 using namespace std;
 using namespace cv;
 
@@ -74,15 +78,26 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg &msg) {
 
     angles[b] = make_pair(begin, end);
   }
+  // Bearings
+  std::vector<float> bearings;
+  std::vector<float> ranges;
+  for (unsigned int i = 0; i < nBeams; i++) {
+    bearings.push_back(msg.bearings[i] + THETA_SHIFT);
+  }
+  // Ranges
+  for (unsigned int i = 0; i < nRanges; i++) {
+    ranges.push_back(msg.ranges[i]);
+  }
 
   for (unsigned int r = 0; r < nRanges; ++r) {
     for (unsigned int b = 0; b < nBeams; ++b) {
 
-      // originally: auto intensity = ping->image().at( b, r );
+      float bearing = bearings.at(b);
+      float range = ranges.at(r);
       auto intensity = msg.v2intensities[(r * nBeams) + b];
-      // auto intensity = msg.intensities[(r * nBeams) + b];
       // Insert color mapping here
-      cv::Scalar color(intensity, intensity, intensity);
+      // cv::Scalar color(intensity, intensity, intensity);
+      cv::Scalar color(bearing, range, intensity);
 
       const float begin = angles[b].first + 270, end = angles[b].second + 270;
 
