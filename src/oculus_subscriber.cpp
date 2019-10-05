@@ -34,9 +34,8 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg &msg) {
   // how to recreate bearings() and image()
   // seems like bearings().at(x) is a 1D array, translates to values in
   // msg.bearings image.at(x,y) is a 2D array, maps to values in msg.intensities
-
   cv::Mat mat(500, 1000, CV_16SC3);
-  mat.setTo(cv::Vec3b(128, 128, 128));
+  mat.setTo(cv::Vec3s(0.0, 0.0, 0.0));
   mat.create(mat.size(), CV_16SC3);
 
   const unsigned int radius = mat.size().width / 2;
@@ -89,27 +88,19 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg &msg) {
   for (unsigned int i = 0; i < nRanges; i++) {
     ranges.push_back(msg.ranges[i]);
   }
+  int bearing_count(0);
 
   for (unsigned int r = 0; r < nRanges; ++r) {
     for (unsigned int b = 0; b < nBeams; ++b) {
 
       float bearing = bearings.at(b);
       float range = ranges.at(r);
+      float intensity = msg.v2intensities[(r * nBeams) + b];
+      cv::Vec3s color(bearing * SCALE_FACTOR, range * SCALE_FACTOR,
+                      intensity * SCALE_FACTOR);
 
-      // std::cout << "bearing: " << bearing << std::endl;
-      // std::cout << "range: " << range << std::endl;
-
-      auto intensity = msg.v2intensities[(r * nBeams) + b];
-      // Insert color mapping here
-      // cv::Scalar color(intensity, intensity, intensity);
-      // SCALE_FACTOR is a macro set to 250 initally to help with display
-      cv::Scalar color(bearing * SCALE_FACTOR, range * SCALE_FACTOR,
-                       intensity * SCALE_FACTOR);
-
+      //
       const float begin = angles[b].first + 270, end = angles[b].second + 270;
-
-      // LOG_IF( DEBUG, r == 128 ) << "From " << begin << " to " << end << ";
-      // color " << color;
 
       const float rad = float(radius * r) / nRanges;
 
@@ -120,6 +111,12 @@ void drawSonar(const imaging_sonar_msgs::ImagingSonarMsg &msg) {
                   end + fudge, color, binThickness * 1.4);
     }
   }
+  // for (unsigned int r = 0; r < nRanges; ++r) {
+  //   for (unsigned int b = 0; b < nBeams; ++b) {
+  //     cv::Vec3s intensity = mat.at<cv::Vec3s>(b, r);
+  //     std::cout << intensity << std::endl;
+  //   }
+  // }
 
   // cv::imshow("ROS sonar", mat);
   // cv::waitKey(1);

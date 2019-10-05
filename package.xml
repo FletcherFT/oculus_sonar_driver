@@ -25,6 +25,8 @@
   <depend>serdp_player</depend>
   <depend>opencv2</depend>
   <depend>gpmf</depend>
+  <depend>image_transport</depend>
+
 
   <export>
   </export>

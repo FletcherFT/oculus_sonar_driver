@@ -38,6 +38,7 @@ find_package(catkin REQUIRED COMPONENTS
   ${CATKIN_PACKAGES}
   OpenCV
   dynamic_reconfigure
+  image_transport
 
 
 )
@@ -53,7 +54,7 @@ add_compile_options(-std=c++14)
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS liboculus g3log_catkin active_object serdp_common gpmf
+  CATKIN_DEPENDS liboculus g3log_catkin active_object serdp_common gpmf image_transport
 )
 
 include_directories(
@@ -70,6 +71,9 @@ add_dependencies(oculus_publisher ${oculus_sonar_ros}_gencfg )
 
 add_executable(oculus_subscriber src/oculus_subscriber.cpp)
 target_link_libraries(oculus_subscriber  ${catkin_LIBRARIES})
+
+add_executable(sonar_img_view src/sonar_img_view.cpp)
+target_link_libraries(sonar_img_view  ${catkin_LIBRARIES})
 
 install(TARGETS oculus_publisher oculus_subscriber
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
