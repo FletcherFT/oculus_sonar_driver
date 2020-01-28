@@ -82,3 +82,5 @@ install(TARGETS oculus_publisher oculus_subscriber
 
 install( DIRECTORY launch/
          DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch )
+install( DIRECTORY rqt_config/
+         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/rqt_config )
