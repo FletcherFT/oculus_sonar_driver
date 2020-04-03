@@ -11,6 +11,7 @@ steps:
   image: amarburg/drone-ci-melodic-ros-base
   shell: /bin/bash
   commands:
+    - apt update && apt install -y libavdevice-dev
     - wget -O- https://gitlab.com/amarburg/ros_drone_ci/-/raw/master/bootstrap.sh | /bin/bash
   environment:
-    ROS_PACKAGES_TO_INSTALL: cv-bridge
+    ROS_PACKAGES_TO_INSTALL: cv-bridge image-transport opencv-apps
