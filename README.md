@@ -18,3 +18,7 @@ Running the command *roslaunch oculus_sonar_ros sonar_and_cameras.launch* will s
 
 Code for the nodes used can be found in oculus_sonar_ros/src  
 Note: errors with running *catkin_make* in step 2 of Installation may be fixed by switching to the "tanner_working" branch in whatever repo is causing an error.
+
+# Licensing
+
+This repository is covered by the [BSD License](LICENSE.txt).
