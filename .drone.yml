@@ -12,3 +12,5 @@ steps:
   shell: /bin/bash
   commands:
     - wget -O- https://gitlab.com/amarburg/ros_drone_ci/-/raw/master/bootstrap.sh | /bin/bash
+  environment:
+    ROS_PACKAGES_TO_INSTALL: cv-bridge
