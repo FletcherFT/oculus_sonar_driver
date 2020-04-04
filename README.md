@@ -1,4 +1,7 @@
 # oculus_sonar_ros
+
+[![Build Status](https://gitlab.drone.camhd.science/api/badges/apl-ocean-engineering/oculus_sonar_ros/status.svg)](https://gitlab.drone.camhd.science/apl-ocean-engineering/oculus_sonar_ros)
+
 ROS nodes that use [liboculus](https://github.com/apl-ocean-engineering/liboculus) to publish sonar data to ROS topics.
 Currently runs on ROS Melodic, Ubuntu 18.04  
 
