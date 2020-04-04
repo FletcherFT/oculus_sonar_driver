@@ -3,5 +3,3 @@
 - git: {local-name: active_object, uri: "https://github.com/apl-ocean-engineering/libactiveobject.git", version: ros}
 - git: {local-name: liboculus, uri: "https://github.com/apl-ocean-engineering/liboculus.git", version: master}
 - git: {local-name: gpmf, uri: "https://github.com/apl-ocean-engineering/libgpmf-fips.git", version: master}
-- git: {local-name: serdp_common, uri: "https://github.com/apl-ocean-engineering/serdp_common.git", version: master}
-- git: {local-name: serdp_player, uri: "https://github.com/apl-ocean-engineering/serdp_player.git", version: master}

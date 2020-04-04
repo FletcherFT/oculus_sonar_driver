@@ -12,8 +12,6 @@ set( CATKIN_PACKAGES
   active_object
   liboculus REQUIRED
   rospy
-  serdp_common
-  serdp_player
   gpmf
 )
 
@@ -54,7 +52,7 @@ add_compile_options(-std=c++14)
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS liboculus g3log_catkin active_object serdp_common gpmf image_transport
+  CATKIN_DEPENDS liboculus g3log_catkin active_object gpmf image_transport
 )
 
 include_directories(
