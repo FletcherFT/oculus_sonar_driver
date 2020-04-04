@@ -9,7 +9,6 @@ platform:
 steps:
 - name: build
   image: amarburg/drone-ci-melodic-ros-base
-  shell: /bin/bash
   commands:
     - apt update && apt install -y libavdevice-dev
     - wget -O- https://gitlab.com/amarburg/ros_drone_ci/-/raw/master/bootstrap.sh | /bin/bash
