@@ -22,7 +22,6 @@
   <depend>active_object</depend>
   <depend>liboculus</depend>
   <depend>opencv2</depend>
-  <depend>gpmf</depend>
   <depend>image_transport</depend>
 
 

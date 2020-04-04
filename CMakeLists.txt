@@ -12,7 +12,6 @@ set( CATKIN_PACKAGES
   active_object
   liboculus REQUIRED
   rospy
-  gpmf
 )
 
 set(OpenCV_DIR /usr/share/OpenCV/)
@@ -52,7 +51,7 @@ add_compile_options(-std=c++14)
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS liboculus g3log_catkin active_object gpmf image_transport
+  CATKIN_DEPENDS liboculus g3log_catkin active_object image_transport
 )
 
 include_directories(

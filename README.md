@@ -9,9 +9,8 @@ NOTE: Images are scaled by SCALE_FACTOR, a macro defaulted to 250 (to help with 
 
 ## Installation
   1. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [active_object](https://gitlab.com/apl-ocean-engineering/hmi-lsd-slam-transition/active_object), [imaging_sonar_msgs](https://gitlab.com/apl-ocean-engineering/imaging_sonar_msgs), and [g3log_catkin](https://gitlab.com/apl-ocean-engineering/lsd-slam/g3log_catkin) to <catkin_ws>/src
-  2. Run *./fips build* from <catkin_ws>/src/liboculus
-  3. Run *catkin_make* from <catkin_ws>
-  4. Run *source ./devel/setup.bash* from <catkin_ws>
+  1. Run *catkin_make* from <catkin_ws>
+  1. Run *source ./devel/setup.bash* from <catkin_ws>
 
 ## Usage
 Running the command *roslaunch oculus_sonar_ros default_ros.launch* will start both the publisher and subscriber nodes, as well as rqt_reconfigure gui.
