@@ -15,3 +15,11 @@ steps:
   environment:
     ROS_PACKAGES_TO_INSTALL: cv-bridge image-transport opencv-apps
     WSTOOL_RECURSIVE: true
+
+- name: slack
+  image: plugins/slack
+  settings:
+    webhook:
+      from_secret: slack_webhook
+  when:
+    status: [ success, failure ]
