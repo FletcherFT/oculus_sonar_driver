@@ -81,3 +81,8 @@ install( DIRECTORY launch/
          DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch )
 install( DIRECTORY rqt_config/
          DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/rqt_config )
+
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(oculus_sonar_test test/unit/main.cpp)
+  target_link_libraries(oculus_sonar_test ${catkin_LIBRARIES})
+endif()
