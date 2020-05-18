@@ -7,6 +7,9 @@
 using std::string;
 // Sonar ROS message that aaron made
 #include <imaging_sonar_msgs/ImagingSonarMsg.h>
+
+#include "oculus_sonar_ros/OculusSonarRawMsg.h"
+
 // Used to get sonar ping info
 #include "liboculus/SimplePingResult.h"
 
@@ -30,7 +33,7 @@ using namespace liboculus;
 class OculusPublisher {
 
   std::unique_ptr<DataRxQueued> dataRx_;
-  ros::Publisher oculus_pub_;
+  ros::Publisher oculus_pub_, oculus_raw_pub_;
   int initRange, initGainPercent, initGamma, initPingRate, initMasterMode;
   SimpleFireMessage initialConfig;
   SimpleFireMessage updateFireMsg;

@@ -39,7 +39,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Build messages
 add_message_files(
   FILES
-  OculusSonarRaw.msg
+  OculusSonarRawMsg.msg
 )
 
 generate_messages(DEPENDENCIES std_msgs sensor_msgs)

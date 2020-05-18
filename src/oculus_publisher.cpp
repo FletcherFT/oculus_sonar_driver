@@ -8,7 +8,9 @@
 
 OculusPublisher::OculusPublisher() : dataRx_( nullptr ) {
   ros::NodeHandle n_;
-  oculus_pub_ = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 1000);
+  oculus_pub_ = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 100);
+  oculus_pub_ = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>("oculus_raw", 100);
+
   //std::thread thread_obj(std::bind(&OculusPublisher::reconfigListener, this));
   // Get parameter values from launch file.
   // if no launch file was used, set equal to default values
@@ -41,9 +43,15 @@ OculusPublisher::~OculusPublisher() {
 void OculusPublisher::pingCallback(shared_ptr<SimplePingResult> ping) {
 
   imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
+  oculus_sonar_ros::OculusSonarRawMsg raw_msg;
+
   // from aaron's OculusSonarBase.cpp
-  sonar_msg.header.seq = ping->ping()->pingId;;
+  sonar_msg.header.seq = ping->ping()->pingId;
   sonar_msg.header.stamp = ros::Time::now();
+
+  raw_msg.header.seq = sonar_msg.header.seq;
+  raw_msg.header.stamp = sonar_msg.header.stamp;
+
   sonar_msg.frequency = ping->ping()->frequency;
 
   const int nBearings = ping->ping()->nBeams;
@@ -64,6 +72,11 @@ void OculusPublisher::pingCallback(shared_ptr<SimplePingResult> ping) {
     }
   }
   oculus_pub_.publish(sonar_msg);
+
+  auto rawSize = ping->buffer()->size();
+  raw_msg.data.resize( rawSize );
+  memcpy( raw_msg.data.data(), ping->buffer()->ptr(), rawSize );
+  oculus_raw_pub_.publish( raw_msg );
 }
 
 // Updates sonar parameters
