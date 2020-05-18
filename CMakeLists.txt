@@ -3,17 +3,6 @@ project(oculus_sonar_ros)
 ## Compile as C++11, supported in ROS Kinetic and newer
 #add_compile_options(-std=c++14)
 
-set( CATKIN_PACKAGES
-  cv_bridge
-  roscpp
-  std_msgs
-  imaging_sonar_msgs
-  g3log_catkin
-  active_object
-  liboculus REQUIRED
-  rospy
-)
-
 set(OpenCV_DIR /usr/share/OpenCV/)
 set( PI "3.14159265358979")
 add_definitions( -DPI=${PI} )
@@ -32,13 +21,29 @@ endif()
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
-  ${CATKIN_PACKAGES}
+  cv_bridge
+  roscpp
+  std_msgs
+  imaging_sonar_msgs
+  g3log_catkin
+  active_object
+  liboculus REQUIRED
+  rospy
   OpenCV
   dynamic_reconfigure
   image_transport
-
-
+  sensor_msgs
+  message_generation
 )
+
+## Build messages
+add_message_files(
+  FILES
+  OculusSonarRaw.msg
+)
+
+generate_messages(DEPENDENCIES std_msgs sensor_msgs)
+
 
 #add dynamic reconfigure api
 generate_dynamic_reconfigure_options(
