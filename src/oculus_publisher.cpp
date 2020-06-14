@@ -15,10 +15,12 @@ OculusPublisher::OculusPublisher()
   //std::thread thread_obj(std::bind(&OculusPublisher::reconfigListener, this));
   // Get parameter values from launch file.
   // if no launch file was used, set equal to default values
-  n_.param<int>("initRange", initRange, 2);
+  int initRange, initGainPercent, initGamma, initPingRate, initMasterMode;
+
+  n_.param<int>("range", initRange, 2);
   n_.param<int>("initGainPercent", initGainPercent, 50);
   n_.param<int>("initGamma", initGamma, 127);
-  n_.param<int>("initPingRate", initPingRate, 2);
+  n_.param<int>("pingRate", initPingRate, 2);
   n_.param<int>("initMasterMode", initMasterMode, 2);
 
   n_.param<string>("ipAddress", _ipAddress, "auto");
