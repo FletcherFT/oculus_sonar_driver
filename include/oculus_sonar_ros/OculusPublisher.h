@@ -32,8 +32,11 @@ class OculusPublisher {
 
   std::unique_ptr< SonarClient > _sonarClient;
 
-  ros::Publisher oculus_pub_, oculus_raw_pub_;
+  ros::Publisher _imagingSonarPub, _oculusRawPub;
+
   int initRange, initGainPercent, initGamma, initPingRate, initMasterMode;
+  std::string _ipAddress;
+
   SonarConfiguration sonarConfig;
 
 public:

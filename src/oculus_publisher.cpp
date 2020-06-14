@@ -9,8 +9,8 @@
 OculusPublisher::OculusPublisher()
   : _sonarClient() {
   ros::NodeHandle n_;
-  oculus_pub_ = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("sonar_info", 100);
-  oculus_pub_ = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>("oculus_raw", 100);
+  _imagingSonarPub = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("imaging_sonar", 100);
+  _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>("oculus_raw", 100);
 
   //std::thread thread_obj(std::bind(&OculusPublisher::reconfigListener, this));
   // Get parameter values from launch file.
@@ -20,6 +20,8 @@ OculusPublisher::OculusPublisher()
   n_.param<int>("initGamma", initGamma, 127);
   n_.param<int>("initPingRate", initPingRate, 2);
   n_.param<int>("initMasterMode", initMasterMode, 2);
+
+  n_.param<string>("ipAddress", _ipAddress, "auto");
 
   // Set up SimpleFireMessage for initial sonar configuration
   sonarConfig.setRange(initRange);
@@ -67,12 +69,12 @@ void OculusPublisher::pingCallback(const shared_ptr<SimplePingResult> &ping) {
       sonar_msg.v2intensities.push_back( ping->image().at(b,r) );
     }
   }
-  oculus_pub_.publish(sonar_msg);
+  _imagingSonarPub.publish(sonar_msg);
 
   auto rawSize = ping->buffer()->size();
   raw_msg.data.resize( rawSize );
   memcpy( raw_msg.data.data(), ping->buffer()->ptr(), rawSize );
-  oculus_raw_pub_.publish( raw_msg );
+  _oculusRawPub.publish( raw_msg );
 }
 
 // Updates sonar parameters
@@ -101,7 +103,7 @@ void OculusPublisher::run() {
 
   try {
 
-    _sonarClient.reset( new SonarClient( sonarConfig, "auto") );
+    _sonarClient.reset( new SonarClient( sonarConfig, _ipAddress) );
 
     _sonarClient->setDataRxCallback( std::bind( &OculusPublisher::pingCallback, this, std::placeholders::_1 ) );
 
@@ -174,12 +176,12 @@ int main(int argc, char **argv) {
    dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
    dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
 
-  OculusPublisher oculus_pub_node;
-   f = boost::bind(&OculusPublisher::configCallback, &oculus_pub_node, _1, _2);
+  OculusPublisher _imagingSonarPubnode;
+   f = boost::bind(&OculusPublisher::configCallback, &_imagingSonarPubnode, _1, _2);
    server.setCallback(f);
 
 
-  oculus_pub_node.run();
+  _imagingSonarPubnode.run();
 
   return 0;
 }
