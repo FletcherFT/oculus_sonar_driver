@@ -9,30 +9,25 @@
 OculusPublisher::OculusPublisher()
   : _sonarClient() {
   ros::NodeHandle n_;
+  ros::NodeHandle ni_( n_, "oculus_publisher");
   _imagingSonarPub = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("imaging_sonar", 100);
   _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>("oculus_raw", 100);
 
-  //std::thread thread_obj(std::bind(&OculusPublisher::reconfigListener, this));
+  // This should be unnecessary, we should get a dynamic reconfigure callback
+  // almost immediately with the params values.
+  //
   // Get parameter values from launch file.
   // if no launch file was used, set equal to default values
-  int initRange, initGainPercent, initGamma, initPingRate, initMasterMode;
+  // int range, gainPercent, gamma, pingRate, freqMode;
+  //
+  // ni_.param<int>("range", range, 2);
+  // ni_.param<int>("gainPercent", gainPercent, 50);
+  // ni_.param<int>("gamma", gamma, 127);
+  // ni_.param<int>("pingRate", pingRate, 0);
+  // ni_.param<int>("freqMode", freqMode, 2);
 
-  n_.param<int>("range", initRange, 2);
-  n_.param<int>("initGainPercent", initGainPercent, 50);
-  n_.param<int>("initGamma", initGamma, 127);
-  n_.param<int>("pingRate", initPingRate, 2);
-  n_.param<int>("initMasterMode", initMasterMode, 2);
+  ni_.param<string>("ipAddress", _ipAddress, "auto");
 
-  n_.param<string>("ipAddress", _ipAddress, "auto");
-
-  // Set up SimpleFireMessage for initial sonar configuration
-  sonarConfig.setRange(initRange);
-  sonarConfig.setGainPercent(initGainPercent);
-  sonarConfig.setGamma(initGamma);
-  //sonarConfig.setPingRate(initPingRate);
-  //sonarConfig.setFreqMode(initMasterMode);
-
-  //run();
 }
 
 OculusPublisher::~OculusPublisher() {
@@ -84,11 +79,21 @@ void OculusPublisher::configCallback(oculus_sonar_ros::OculusSonarConfig &config
 
   sonarConfig.postponeCallback();
 
+  ROS_INFO_STREAM("Setting sonar range to " << config.range );
   sonarConfig.setRange( config.range);
+
+  ROS_INFO_STREAM("Setting gain to " << config.gain << " pct");
   sonarConfig.setGainPercent(config.gain);
+
+  ROS_INFO_STREAM("Setting gamma to " << config.gamma);
   sonarConfig.setGamma(config.gamma);
-  //sonarConfig.setPingRate(config.ping_rate);
-  //sonarConfig.setFreqMode(config.master_mode);
+
+  ROS_INFO_STREAM("Setting ping rate to (" << config.pingRate << "): " << PingRateToHz(config.pingRate) << " Hz" );
+  sonarConfig.setPingRate( static_cast<PingRateType>(config.pingRate) );
+
+  ROS_INFO_STREAM("Setting freq mode to " << FreqModeToString( config.freqMode) );
+  sonarConfig.setFreqMode( static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode) );
+
   sonarConfig.sendCallback();
 }
 
@@ -112,52 +117,6 @@ void OculusPublisher::run() {
     _sonarClient->start();
 
     ros::spin();
-
-    // // Run loop while ROS is up
-    // while( ros::ok() ) {
-    //
-    //
-    //   //
-    //   //
-    //   // // Set up dataRx with correct ip address of sonar
-    //   // while( !dataRx_ ) {
-    //   //
-    //   //
-    //   //   LOG(DEBUG) << "Need to find the sonar.  Waiting for sonar...";
-    //   //
-    //   //   if( statusRx->status().wait_for(std::chrono::seconds(1)) ){
-    //   //     boost::asio::ip::address addr;
-    //   //     LOG(INFO) << "Got sonar message";
-    //   //     if( statusRx->status().valid() ) {
-    //   //       addr = statusRx->status().ipAddr();
-    //   //
-    //   //       LOG(DEBUG) << "Using detected sonar at IP address " << addr;
-    //   //
-    //   //       //statusRx->status().dump();
-    //   //
-    //   //       dataRx_.reset( new DataRxQueued( ioSrv.service(), addr ) );
-    //   //
-    //   //     } else {
-    //   //         LOG(WARNING) << "IP address " << addr << " wasn't valid";
-    //   //     }
-    //   //   } else {
-    //   //     LOG(WARNING) << "Failed to get status, trying again";
-    //   //   }
-    //   // }
-    //   // if (init) {
-    //   //   init = false;
-    //   //   dataRx_->updateFireMessage(initialConfig);
-    //   // }
-    //   //
-    //   // // Wait for pings from sonar
-    //   // shared_ptr<SimplePingResult> ping;
-    //   // dataRx_->queue().wait_and_pop( ping );
-    //   //
-    //   // // Process and publish ping once recieved
-    //   // this->pingCallback(ping);
-    //   ros::spinOnce();
-    //
-    // }
 
     _sonarClient->stop();
     _sonarClient->join();

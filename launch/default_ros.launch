@@ -3,21 +3,21 @@
 -->
 <launch>
   <arg name="range" default="2"/>
-  <!-- <arg name="initGainPercent" default="50"/>
-  <arg name="initGamma" default="127"/> -->
-  <arg name="pingRate" default="2"/>
-  <!-- <arg name="initMasterMode" default="2"/> -->
+  <arg name="gainPercent" default="50"/>
+  <arg name="gamma" default="127"/>
+  <arg name="pingRate" default="0"/>
+  <arg name="freqMode" default="2"/>
   <arg name="ipAddress" default="auto"/>
 
-  <group ns="oculus">
-
+  <node pkg="oculus_sonar_ros" type="oculus_publisher" name="oculus_publisher" output="screen" launch-prefix="gdb -ex run --args">
     <param name="ipAddress" value="$(arg ipAddress)"/>
     <param name="range" value="$(arg range)"/>
     <param name="pingRate" value="$(arg pingRate)"/>
+    <param name="gamma" value="$(arg gamma)"/>
+    <param name="gainPercent" value="$(arg gainPercent)"/>
+    <param name="freqMode" value="$(arg freqMode)"/>
+  </node>
+  <node pkg="oculus_sonar_ros" type="oculus_subscriber" name="oculus_subscriber"/>
+  <!-- <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/> -->
 
-    <node pkg="oculus_sonar_ros" type="oculus_publisher" name="oculus_publisher" output="screen"/>
-    <node pkg="oculus_sonar_ros" type="oculus_subscriber" name="oculus_subscriber"/>
-    <!-- <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/> -->
-
-  </group>
 </launch>
