@@ -9,6 +9,21 @@ At present we have only tested with the [Oculus M1200d](https://www.blueprintsub
 
 NOTE: Images are scaled by SCALE_FACTOR, a macro defaulted to 250 (to help with display)  
 
+## Contents
+
+This package defines two nodelets.  Both nodelets are registered with `plugin_lib`
+
+  * `oculus_sonar/driver` interfaces with the sonar over ethernet and publishes `imaging_sonar_msgs::ImagingSonarMsg` and `oculus_sonar_ros/OculusSonarRawMsg` messages.
+
+  * `oculus_sonar/draw` subscribes to `imaging_sonar_msgs::ImagingSonarMsg` and produces an `Image` of the sonar for easy preview (e.g. in `rqt`).
+
+The package also builds to conventional nodes:
+
+  * `oculus_driver` runs both nodes.
+  * `oculus_draw` runs only the `draw` node.
+
+
+
 ## Installation
   1. Either:
      1. Use [wstool](http://wiki.ros.org/wstool):
