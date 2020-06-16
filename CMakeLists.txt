@@ -71,13 +71,13 @@ add_executable(oculus_publisher src/oculus_publisher.cpp)
 target_link_libraries(oculus_publisher ${catkin_LIBRARIES})
 add_dependencies(oculus_publisher ${oculus_sonar_ros}_gencfg )
 
-add_executable(oculus_subscriber src/oculus_subscriber.cpp)
-target_link_libraries(oculus_subscriber  ${catkin_LIBRARIES})
+add_executable(oculus_draw src/oculus_draw.cpp)
+target_link_libraries(oculus_draw  ${catkin_LIBRARIES})
 
 add_executable(sonar_img_view src/sonar_img_view.cpp)
 target_link_libraries(sonar_img_view  ${catkin_LIBRARIES})
 
-install(TARGETS oculus_publisher oculus_subscriber
+install(TARGETS oculus_publisher oculus_draw
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
