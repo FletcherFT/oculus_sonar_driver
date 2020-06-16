@@ -1,15 +1,30 @@
-#include "oculus_sonar_ros/OculusPublisher.h"
+#include "oculus_sonar_ros/OculusDriver.h"
 #include "g3_to_ros_logger/ROSLogSink.h"
 #include "g3_to_ros_logger/g3logger.h"
 
 #include <boost/asio.hpp>
 
 
+namespace oculus_sonar {
 
-OculusPublisher::OculusPublisher()
-  : _sonarClient() {
+OculusDriver::OculusDriver()
+  : Nodelet(),
+    _sonarClient(),
+    _reconfigureServer()
+ {;}
+
+OculusDriver::~OculusDriver() {
+    _sonarClient->stop();
+    _sonarClient->join();
+}
+
+void OculusDriver::onInit() {
+
+  _reconfigureServer.setCallback( boost::bind(&OculusDriver::configCallback, this, _1, _2) );
+
   ros::NodeHandle n_;
-  ros::NodeHandle ni_( n_, "oculus_publisher");
+  ros::NodeHandle ni_( n_, "oculus_driver");
+
   _imagingSonarPub = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("imaging_sonar", 100);
   _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>("oculus_raw", 100);
 
@@ -28,14 +43,15 @@ OculusPublisher::OculusPublisher()
 
   ni_.param<string>("ipAddress", _ipAddress, "auto");
 
-}
+  _sonarClient.reset( new SonarClient( sonarConfig, _ipAddress) );
+  _sonarClient->setDataRxCallback( std::bind( &OculusDriver::pingCallback, this, std::placeholders::_1 ) );
+  _sonarClient->start();
 
-OculusPublisher::~OculusPublisher() {
 }
 
 
 // Processes and publishes sonar pings to a ROS topic
-void OculusPublisher::pingCallback(const shared_ptr<SimplePingResult> &ping) {
+void OculusDriver::pingCallback(const shared_ptr<SimplePingResult> &ping) {
 
   imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
   oculus_sonar_ros::OculusSonarRawMsg raw_msg;
@@ -75,7 +91,7 @@ void OculusPublisher::pingCallback(const shared_ptr<SimplePingResult> &ping) {
 }
 
 // Updates sonar parameters
-void OculusPublisher::configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level) {
+void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level) {
 
   sonarConfig.postponeCallback();
 
@@ -98,51 +114,27 @@ void OculusPublisher::configCallback(oculus_sonar_ros::OculusSonarConfig &config
 }
 
 // // Set up dynamic reconfigure server in separate thread
-// void OculusPublisher::reconfigListener() {
+// void OculusDriver::reconfigListener() {
 //   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
 //   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
-//   f = boost::bind(&OculusPublisher::configCallback, this, _1, _2);
+//   f = boost::bind(&OculusDriver::configCallback, this, _1, _2);
 //   server.setCallback(f);
 //   ros::spin();
 // }
 
-void OculusPublisher::run() {
+// int main(int argc, char **argv) {
+//   libg3logger::G3Logger<ROSLogSink> logWorker(argv[0]);
+//   logWorker.logBanner();
+//   logWorker.verbose(2);
+//
+//   ros::init(argc, argv, "oculus_node");
+//
+//   _imagingSonarPubnode.run();
+//
+//   return 0;
+// }
 
-  try {
+};
 
-    _sonarClient.reset( new SonarClient( sonarConfig, _ipAddress) );
-
-    _sonarClient->setDataRxCallback( std::bind( &OculusPublisher::pingCallback, this, std::placeholders::_1 ) );
-
-    _sonarClient->start();
-
-    ros::spin();
-
-    _sonarClient->stop();
-    _sonarClient->join();
-
-  }
-  catch (std::exception& e) {
-    LOG(WARNING) << e.what();
-  }
-}
-
-int main(int argc, char **argv) {
-  libg3logger::G3Logger<ROSLogSink> logWorker(argv[0]);
-  logWorker.logBanner();
-  logWorker.verbose(2);
-
-  ros::init(argc, argv, "oculus_node");
-
-   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
-   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
-
-  OculusPublisher _imagingSonarPubnode;
-   f = boost::bind(&OculusPublisher::configCallback, &_imagingSonarPubnode, _1, _2);
-   server.setCallback(f);
-
-
-  _imagingSonarPubnode.run();
-
-  return 0;
-}
+#include <pluginlib/class_list_macros.h>
+PLUGINLIB_EXPORT_CLASS(oculus_sonar::OculusDriver, nodelet::Nodelet);

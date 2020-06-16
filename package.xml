@@ -24,6 +24,8 @@
   <depend>active_object</depend>
   <depend>liboculus</depend>
   <depend>image_transport</depend>
+  <depend>nodelet</depend>
+  <depend>nodelet_topic_tools</depend>
 
 
   <export>
