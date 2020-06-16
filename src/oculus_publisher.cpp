@@ -79,7 +79,7 @@ void OculusPublisher::configCallback(oculus_sonar_ros::OculusSonarConfig &config
 
   sonarConfig.postponeCallback();
 
-  ROS_INFO_STREAM("Setting sonar range to " << config.range );
+  ROS_INFO_STREAM("Setting sonar range to " << config.range << " m");
   sonarConfig.setRange( config.range);
 
   ROS_INFO_STREAM("Setting gain to " << config.gain << " pct");
