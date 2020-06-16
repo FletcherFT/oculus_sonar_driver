@@ -1,0 +1,6 @@
+<!-- Launches oculus_publisher, oculus_subscriber, and dynamic reconfigure gui
+     with default sonar parameters (as defined in SimpleFireMessage.cpp)
+-->
+<launch>
+  <node pkg="oculus_sonar_ros" type="oculus_draw" name="oculus_draw"/>
+</launch>

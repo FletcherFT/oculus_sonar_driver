@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
 
   //  ros::Subscriber sub = n.subscribe("sonar_info", 100, std::bind(&drawSonar,
   //  std::placeholders::_1, oculus_drawn_pub));
-  ros::Subscriber sub = n.subscribe("sonar_info", 100, drawSonar);
+  ros::Subscriber sub = n.subscribe("imaging_sonar", 100, drawSonar);
 
   counter = 0;
   ros::spin();
