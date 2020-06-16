@@ -112,6 +112,9 @@ install( DIRECTORY launch/
 install( DIRECTORY rqt_config/
          DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/rqt_config )
 
+install( FILES plugins/nodelet_plugins.xml
+  		   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+
 if (CATKIN_ENABLE_TESTING)
   catkin_add_gtest(oculus_sonar_test test/unit/main.cpp)
   target_link_libraries(oculus_sonar_test ${catkin_LIBRARIES})
