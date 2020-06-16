@@ -73,7 +73,7 @@ add_library(oculus_driver_nodelet src/oculus_driver_nodelet.cpp)
 target_link_libraries(oculus_driver_nodelet ${catkin_LIBRARIES})
 class_loader_hide_library_symbols(oculus_driver_nodelet)
 
-add_executable(oculus_driver src/oculus_driver_node.cpp)
+add_executable(oculus_driver src/oculus_node.cpp)
 target_link_libraries(oculus_driver
    oculus_draw_nodelet
    ${catkin_LIBRARIES} )
