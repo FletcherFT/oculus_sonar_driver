@@ -63,7 +63,6 @@ catkin_package(
 
 include_directories(
   ${OpenCV_INCLUDE_DIRS}
-  thirdparty/
   include/
   ${catkin_INCLUDE_DIRS}
 )
