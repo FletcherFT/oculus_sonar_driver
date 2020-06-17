@@ -4,18 +4,19 @@ project(oculus_sonar_ros)
 #add_compile_options(-std=c++14)
 
 set(OpenCV_DIR /usr/share/OpenCV/)
-set( PI "3.14159265358979")
-add_definitions( -DPI=${PI} )
 
-set( SCALE_FACTOR "250")
-add_definitions( -DSCALE_FACTOR=${SCALE_FACTOR} )
+#set( PI "3.14159265358979")
+#add_definitions( -DPI=${PI} )
 
-OPTION(THETA_SHIFT_DEGREES "Define " ON) # Enabled by default
-if(THETA_SHIFT_DEGREES)
-	add_definitions( -DTHETA_SHIFT=90 )
-else()
-	add_definitions( -DTHETA_SHIFT=${PI} )
-endif()
+#set( SCALE_FACTOR "250")
+#add_definitions( -DSCALE_FACTOR=${SCALE_FACTOR} )
+
+#OPTION(THETA_SHIFT_DEGREES "Define " ON) # Enabled by default
+#if(THETA_SHIFT_DEGREES)
+#	add_definitions( -DTHETA_SHIFT=90 )
+#else()
+#	add_definitions( -DTHETA_SHIFT=${PI} )
+#endif()
 
 
 # Standard dependencies
