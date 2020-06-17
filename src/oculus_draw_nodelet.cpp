@@ -27,6 +27,23 @@ using namespace cv;
 
 namespace oculus_sonar {
 
+  struct ImagingSonarMsgInterface : public serdp_common::AbstractSonarInterface {
+
+    ImagingSonarMsgInterface( const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &ping )
+      : _ping(ping) {;}
+
+    virtual int nBearings() const         { return _ping->bearings.size(); }
+    virtual float bearing( int n ) const  { return _ping->bearings[n]; }
+
+    virtual int nRanges() const           { return _ping->ranges.size(); }
+    virtual float range( int n ) const    { return _ping->ranges[n]; }
+
+    virtual uint8_t intensity( int i ) const { return _ping->v2intensities[i]; }
+
+    imaging_sonar_msgs::ImagingSonarMsg::ConstPtr _ping;
+  };
+
+
   class OculusDrawNodelet : public nodelet::Nodelet {
   public:
 
@@ -56,17 +73,12 @@ namespace oculus_sonar {
       pub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar", 10);
     }
 
-    // For now, does a copy.  Will improve later...
-    serdp_common::AbstractSonarData msgToAbstractSonarData( const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg ) {
-        return serdp_common::AbstractSonarData( msg->bearings, msg->ranges, msg->v2intensities );
-    }
-
     void imagingSonarCallback(const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg) {
 
-      serdp_common::AbstractSonarData d( msgToAbstractSonarData(msg) );
-      cv::Size sz = serdp_common::calculateImageSize( d, cv::Size( _width, _height), _pixPerRangeBin );
+      ImagingSonarMsgInterface interface( msg );
+      cv::Size sz = serdp_common::calculateImageSize( interface, cv::Size( _width, _height), _pixPerRangeBin );
       cv::Mat mat( sz, CV_8UC3 );
-      serdp_common::drawSonar( d, mat, *_colorMap );
+      serdp_common::drawSonar( interface, mat, *_colorMap );
 
       // Convert and publish drawn sonar images
       std_msgs::Header header;
