@@ -78,7 +78,7 @@ namespace oculus_sonar {
       const int nBeams = msg->bearings.size();
       const int nIntensities = msg->v2intensities.size();
 
-      cv::Mat mat(500, 1000, CV_16SC3, Scalar(0.0, 0.0, 0.0));
+      cv::Mat mat(500, 1000, CV_8UC3, Scalar(0.0, 0.0, 0.0));
 
       const unsigned int radius = mat.size().width / 2;
       const cv::Point origin(radius, mat.size().height);
@@ -90,59 +90,48 @@ namespace oculus_sonar {
       // Build vector of start and end angles (in degrees, but still in sonar 0 ==
       // straight ahead frame)
 
-      vector<pair<float, float>> angles(nBeams, make_pair(0.0f, 0.0f));
+      struct BearingEntry {
+        float begin, center, end;
+
+      };
+
+      vector<BearingEntry> angles;
+      angles.reserve( nBeams );
 
       for (unsigned int b = 0; b < nBeams; ++b) {
+        const float center = msg->bearings[b] + ThetaShift;
         float begin = 0.0, end = 0.0;
 
-        // LOG(DEBUG) << "Bearing " << b << " is " << ping->bearings().at(b);
         if (b == 0) {
 
-          // originally: end = (ping->bearings().at(b+1) +
-          // ping->bearings().at(b))/2.0;
-          end = (msg->bearings[b + 1] + msg->bearings[b]) / 2.0;
-          // originally: begin = 2*ping->bearings().at(b) - end;
-          begin = 2 * msg->bearings[b] - end;
+          end = (msg->bearings[b + 1] + center) / 2.0;
+          begin = 2 * center - end;
 
         } else if (b == nBeams - 1) {
 
-          begin = angles[b - 1].second;
-          // originally: end = 2*ping->bearings().at(b) - begin;
-          end = 2 * msg->bearings[b] - begin;
+          begin = angles[b - 1].end;
+          end = 2 * center - begin;
 
         } else {
 
-          begin = angles[b - 1].second;
-          // originally: end = (ping->bearings().at(b+1) +
-          // ping->bearings().at(b))/2.0;
-          end = (msg->bearings[b + 1] + msg->bearings[b]) / 2.0;
+          begin = angles[b - 1].end;
+          end = (msg->bearings[b + 1] + center) / 2.0;
         }
 
-        angles[b] = make_pair(begin, end);
+        angles.push_back( {begin, center, end} );
       }
-      // Bearings
-      std::vector<float> bearings;
-      std::vector<float> ranges;
-      for (unsigned int i = 0; i < nBeams; i++) {
-        bearings.push_back(msg->bearings[i] + ThetaShift);
-      }
-      // Ranges
-      for (unsigned int i = 0; i < nRanges; i++) {
-        ranges.push_back(msg->ranges[i]);
-      }
-      int bearing_count(0);
 
       for (unsigned int r = 0; r < nRanges; ++r) {
         for (unsigned int b = 0; b < nBeams; ++b) {
 
-          float bearing = bearings.at(b);
-          float range = ranges.at(r);
+          float range = msg->ranges[r];
           uint8_t intensity = msg->v2intensities[(r * nBeams) + b];
           // cv::Vec3s color(bearing * SCALE_FACTOR, range * SCALE_FACTOR,
           //                 intensity * SCALE_FACTOR);
 
           //
-          const float begin = angles[b].first + 270, end = angles[b].second + 270;
+          const float begin = angles[b].begin,
+                      end = angles[b].end;
 
           const float rad = float(radius * r) / nRanges;
 
@@ -152,7 +141,7 @@ namespace oculus_sonar {
           cv::ellipse(mat, origin, cv::Size(rad, rad), 0,
                       begin - fudge,
                       end + fudge,
-                      _colorMap->color( bearing, range, intensity ),
+                      _colorMap->color( angles[b].center, range, intensity ),
                       binThickness * 1.4);
         }
       }
