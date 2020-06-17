@@ -22,6 +22,7 @@
   <depend>imaging_sonar_msgs</depend>
   <depend>g3log_catkin</depend>
   <depend>active_object</depend>
+  <depend>serdp_common</depend>
   <depend>liboculus</depend>
   <depend>image_transport</depend>
   <depend>nodelet</depend>
@@ -30,5 +31,5 @@
   <export>
     <nodelet plugin="${prefix}/nodelet_plugins.xml" />
   </export>
-  
+
 </package>

@@ -5,8 +5,6 @@ project(oculus_sonar_ros)
 
 set(OpenCV_DIR /usr/share/OpenCV/)
 
-#set( PI "3.14159265358979")
-#add_definitions( -DPI=${PI} )
 
 #set( SCALE_FACTOR "250")
 #add_definitions( -DSCALE_FACTOR=${SCALE_FACTOR} )
@@ -29,6 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
   g3log_catkin
   active_object
   liboculus REQUIRED
+  serdp_common
   rospy
   OpenCV
   dynamic_reconfigure
@@ -83,7 +82,7 @@ add_dependencies(oculus_driver
  	 ${oculus_sonar_ros}_gencfg )
 
 
-add_library(oculus_draw_nodelet src/oculus_draw_nodelet.cpp)
+add_library(oculus_draw_nodelet src/oculus_draw_nodelet.cpp )
 target_link_libraries(oculus_draw_nodelet ${catkin_LIBRARIES})
 class_loader_hide_library_symbols(oculus_draw_nodelet)
 

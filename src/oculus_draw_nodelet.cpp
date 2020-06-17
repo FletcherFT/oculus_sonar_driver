@@ -18,23 +18,26 @@ using namespace cv;
 #include "g3_to_ros_logger/g3logger.h"
 #include <iostream>
 
+#include "serdp_common/ColorMaps.h"
+
 // Subscribes to sonar message topic, draws using opencv then publishes result
 
 namespace oculus_sonar {
+
+  using namespace ColorMaps;
 
   class OculusDrawNodelet : public nodelet::Nodelet {
   public:
 
     const float ThetaShift = 270;
-    const int PixelsPerRangeBin = 2;  // Only used if _height == _width == 0
 
-    // TODO.  _height and _width should be params
+    // NB Color Maps are in the serdp_common package
 
     OculusDrawNodelet()
       : Nodelet(),
         _counter(0),
-        _height(0), _width(0),
-        _colorMap( new MitchellColorMap )
+        _height(0), _width(0), _pixPerRangeBin(2),
+        _colorMap( new InfernoColorMap )
     {;}
 
     virtual ~OculusDrawNodelet()
@@ -47,7 +50,7 @@ namespace oculus_sonar {
 
       nh.param<int>("width", _width, 0);
       nh.param<int>("height", _height, 0);
-
+      nh.param<int>("pix_per_range_bin", _pixPerRangeBin, 2 );
 
       sub_ = nh.subscribe("imaging_sonar", 10, &OculusDrawNodelet::imagingSonarCallback, this );
 
@@ -88,7 +91,7 @@ namespace oculus_sonar {
         const int height = _height;
 
         if( _height <= 0 ) {
-            h = msg->ranges.size() * PixelsPerRangeBin;
+            h = msg->ranges.size() * _pixPerRangeBin;
         }
 
         // Assume bearings are symmetric plus and minus
@@ -106,7 +109,6 @@ namespace oculus_sonar {
 
       const int nRanges = msg->ranges.size();
       const int nBeams = msg->bearings.size();
-      const int nIntensities = msg->v2intensities.size();
 
       const cv::Size sz = calculateImageSize( msg );
       cv::Mat mat( sz, CV_8UC3, Scalar(0.0, 0.0, 0.0));
@@ -166,9 +168,8 @@ namespace oculus_sonar {
 
           // Assume angles are in image frame x-right, y-down
           cv::ellipse(mat, origin, cv::Size(rad, rad), 0,
-                      begin - fudge,
-                      end + fudge,
-                      _colorMap->color( angles[b].center, range, intensity ),
+                      begin, end,
+                      255*_colorMap->color( angles[b].center, range, intensity ),
                       binThickness * 1.4);
         }
       }
@@ -181,18 +182,7 @@ namespace oculus_sonar {
     ros::Publisher pub_;
     int _counter;
 
-    int _height, _width;
-
-
-    struct ColorMap {
-      virtual cv::Scalar color( float bearing, float range, uint8_t intensity ) = 0;
-    };
-
-    struct MitchellColorMap : public ColorMap {
-      virtual cv::Scalar color( float bearing, float range, uint8_t intensity ) {
-        return Scalar( 256-intensity, intensity, intensity );
-      }
-    };
+    int _height, _width, _pixPerRangeBin;
 
     std::unique_ptr< ColorMap > _colorMap;
 
