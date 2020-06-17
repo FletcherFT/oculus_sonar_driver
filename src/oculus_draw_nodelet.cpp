@@ -25,8 +25,7 @@ namespace oculus_sonar {
   class OculusDrawNodelet : public nodelet::Nodelet {
   public:
 
-    const float ThetaShift = M_PI;
-
+    const float ThetaShift = 270;
 
     OculusDrawNodelet()
       : Nodelet(),
@@ -62,7 +61,8 @@ namespace oculus_sonar {
       header.seq = _counter;
       header.stamp = ros::Time::now();
 
-      cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR16,
+      cv_bridge::CvImage img_bridge(header,
+                                    sensor_msgs::image_encodings::BGR8,
                                     mat);
 
       sensor_msgs::Image output_msg;
@@ -85,21 +85,20 @@ namespace oculus_sonar {
 
       const float binThickness = 3 * ceil(radius / nRanges);
 
-      // LOG(DEBUG) << "binThickness is " << binThickness;
-
-      // Build vector of start and end angles (in degrees, but still in sonar 0 ==
-      // straight ahead frame)
-
+      // Current ImagingSonarMsg data is in _degrees_
       struct BearingEntry {
-        float begin, center, end;
+          float begin, center, end;
 
+          BearingEntry( float b, float c, float e )
+            : begin( b ), center(c), end(e)
+              {;}
       };
 
       vector<BearingEntry> angles;
       angles.reserve( nBeams );
 
       for (unsigned int b = 0; b < nBeams; ++b) {
-        const float center = msg->bearings[b] + ThetaShift;
+        const float center = msg->bearings[b];
         float begin = 0.0, end = 0.0;
 
         if (b == 0) {
@@ -118,7 +117,7 @@ namespace oculus_sonar {
           end = (msg->bearings[b + 1] + center) / 2.0;
         }
 
-        angles.push_back( {begin, center, end} );
+        angles.push_back( BearingEntry(begin, center, end) );
       }
 
       for (unsigned int r = 0; r < nRanges; ++r) {
@@ -126,16 +125,13 @@ namespace oculus_sonar {
 
           float range = msg->ranges[r];
           uint8_t intensity = msg->v2intensities[(r * nBeams) + b];
-          // cv::Vec3s color(bearing * SCALE_FACTOR, range * SCALE_FACTOR,
-          //                 intensity * SCALE_FACTOR);
 
-          //
-          const float begin = angles[b].begin,
-                      end = angles[b].end;
+          const float begin = angles[b].begin + ThetaShift,
+                      end = angles[b].end + ThetaShift;
 
           const float rad = float(radius * r) / nRanges;
 
-          const float fudge = 0.7;
+          const float fudge = 0; // in degrees
 
           // Assume angles are in image frame x-right, y-down
           cv::ellipse(mat, origin, cv::Size(rad, rad), 0,
@@ -146,6 +142,7 @@ namespace oculus_sonar {
         }
       }
 
+      return mat;
 
     }
 
@@ -160,7 +157,7 @@ namespace oculus_sonar {
 
     struct MitchellColorMap : public ColorMap {
       virtual cv::Scalar color( float bearing, float range, uint8_t intensity ) {
-        return Scalar( intensity, intensity, intensity );
+        return Scalar( 256-intensity, intensity, intensity );
       }
     };
 
