@@ -7,10 +7,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#ifndef THETA_SHIFT
-#define THETA_SHIFT PI;
-#endif
-
 using namespace std;
 using namespace cv;
 
@@ -28,9 +24,14 @@ namespace oculus_sonar {
 
   class OculusDrawNodelet : public nodelet::Nodelet {
   public:
+
+    const float ThetaShift = M_PI;
+
+
     OculusDrawNodelet()
       : Nodelet(),
-        _counter(0)
+        _counter(0),
+        _colorMap( new MitchellColorMap )
     {;}
 
     virtual ~OculusDrawNodelet()
@@ -54,16 +55,30 @@ namespace oculus_sonar {
 
     void imagingSonarCallback(const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg) {
 
-      int nRanges = msg->ranges.size();
-      int nBeams = msg->bearings.size();
-      int nIntensities = msg->v2intensities.size();
-      // int nIntensities = msg->intensities.size();
-      // how to recreate bearings() and image()
-      // seems like bearings().at(x) is a 1D array, translates to values in
-      // msg->bearings image.at(x,y) is a 2D array, maps to values in msg->intensities
-      cv::Mat mat(500, 1000, CV_16SC3);
-      mat.setTo(cv::Vec3s(0.0, 0.0, 0.0));
-      mat.create(mat.size(), CV_16SC3);
+      cv::Mat mat = drawSonar( msg );
+
+      // Convert and publish drawn sonar images
+      std_msgs::Header header;
+      header.seq = _counter;
+      header.stamp = ros::Time::now();
+
+      cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR16,
+                                    mat);
+
+      sensor_msgs::Image output_msg;
+      img_bridge.toImageMsg(output_msg);
+      pub_.publish(output_msg);
+
+      _counter++;
+    }
+
+    cv::Mat drawSonar(const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg) {
+
+      const int nRanges = msg->ranges.size();
+      const int nBeams = msg->bearings.size();
+      const int nIntensities = msg->v2intensities.size();
+
+      cv::Mat mat(500, 1000, CV_16SC3, Scalar(0.0, 0.0, 0.0));
 
       const unsigned int radius = mat.size().width / 2;
       const cv::Point origin(radius, mat.size().height);
@@ -109,7 +124,7 @@ namespace oculus_sonar {
       std::vector<float> bearings;
       std::vector<float> ranges;
       for (unsigned int i = 0; i < nBeams; i++) {
-        bearings.push_back(msg->bearings[i] + THETA_SHIFT);
+        bearings.push_back(msg->bearings[i] + ThetaShift);
       }
       // Ranges
       for (unsigned int i = 0; i < nRanges; i++) {
@@ -122,9 +137,9 @@ namespace oculus_sonar {
 
           float bearing = bearings.at(b);
           float range = ranges.at(r);
-          float intensity = msg->v2intensities[(r * nBeams) + b];
-          cv::Vec3s color(bearing * SCALE_FACTOR, range * SCALE_FACTOR,
-                          intensity * SCALE_FACTOR);
+          uint8_t intensity = msg->v2intensities[(r * nBeams) + b];
+          // cv::Vec3s color(bearing * SCALE_FACTOR, range * SCALE_FACTOR,
+          //                 intensity * SCALE_FACTOR);
 
           //
           const float begin = angles[b].first + 270, end = angles[b].second + 270;
@@ -134,38 +149,33 @@ namespace oculus_sonar {
           const float fudge = 0.7;
 
           // Assume angles are in image frame x-right, y-down
-          cv::ellipse(mat, origin, cv::Size(rad, rad), 0, begin - fudge,
-                      end + fudge, color, binThickness * 1.4);
+          cv::ellipse(mat, origin, cv::Size(rad, rad), 0,
+                      begin - fudge,
+                      end + fudge,
+                      _colorMap->color( bearing, range, intensity ),
+                      binThickness * 1.4);
         }
       }
-      // for (unsigned int r = 0; r < nRanges; ++r) {
-      //   for (unsigned int b = 0; b < nBeams; ++b) {
-      //     cv::Vec3s intensity = mat.at<cv::Vec3s>(b, r);
-      //     std::cout << intensity << std::endl;
-      //   }
-      // }
 
-      // cv::imshow("ROS sonar", mat);
-      // cv::waitKey(1);
 
-      // Convert and publish drawn sonar images
-      std_msgs::Header header;
-      header.seq = _counter;
-      header.stamp = ros::Time::now();
-
-      cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR16,
-                                    mat);
-
-      sensor_msgs::Image output_msg;
-      img_bridge.toImageMsg(output_msg);
-      pub_.publish(output_msg);
-
-      _counter++;
     }
 
     ros::Subscriber sub_;
     ros::Publisher pub_;
     int _counter;
+
+
+    struct ColorMap {
+      virtual cv::Scalar color( float bearing, float range, uint8_t intensity ) = 0;
+    };
+
+    struct MitchellColorMap : public ColorMap {
+      virtual cv::Scalar color( float bearing, float range, uint8_t intensity ) {
+        return Scalar( intensity, intensity, intensity );
+      }
+    };
+
+    std::unique_ptr< ColorMap > _colorMap;
 
   };
 
@@ -173,23 +183,3 @@ namespace oculus_sonar {
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(oculus_sonar::OculusDrawNodelet, nodelet::Nodelet);
-
-
-// int main(int argc, char **argv) {
-//   libg3logger::G3Logger<ROSLogSink> logWorker(argv[0]);
-//   logWorker.logBanner();
-//   logWorker.verbose(2);
-//
-//   ros::init(argc, argv, "oculus_sub");
-//   ros::NodeHandle n;
-//
-//   oculus_drawn_pub = n.advertise<sensor_msgs::Image>("drawn_sonar", 100);
-//
-//   //  ros::Subscriber sub = n.subscribe("sonar_info", 100, std::bind(&drawSonar,
-//   //  std::placeholders::_1, oculus_drawn_pub));
-//   ros::Subscriber sub = n.subscribe("sonar_info", 100, drawSonar);
-//
-//   counter = 0;
-//   ros::spin();
-//   return 0;
-// }
