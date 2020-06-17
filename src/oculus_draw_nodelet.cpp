@@ -26,10 +26,14 @@ namespace oculus_sonar {
   public:
 
     const float ThetaShift = 270;
+    const int PixelsPerRangeBin = 2;  // Only used if _height == _width == 0
+
+    // TODO.  _height and _width should be params
 
     OculusDrawNodelet()
       : Nodelet(),
         _counter(0),
+        _height(0), _width(0),
         _colorMap( new MitchellColorMap )
     {;}
 
@@ -40,6 +44,10 @@ namespace oculus_sonar {
 
     virtual void onInit() {
       ros::NodeHandle nh = getNodeHandle();
+
+      nh.param<int>("width", _width, 0);
+      nh.param<int>("height", _height, 0);
+
 
       sub_ = nh.subscribe("imaging_sonar", 10, &OculusDrawNodelet::imagingSonarCallback, this );
 
@@ -72,16 +80,39 @@ namespace oculus_sonar {
       _counter++;
     }
 
+    cv::Size calculateImageSize( const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg ) {
+
+      int h = _height, w = _width;
+
+      if( _width <= 0 ) {
+        const int height = _height;
+
+        if( _height <= 0 ) {
+            h = msg->ranges.size() * PixelsPerRangeBin;
+        }
+
+        // Assume bearings are symmetric plus and minus
+        // Also assumes bearings are degrees
+        w = 2*fabs(h*sin( M_PI/180 * msg->bearings[0] ));
+
+      } else if( _height <= 0 ) {
+        h = (w/2) / fabs(sin( M_PI/180 * msg->bearings[0]));
+      }
+
+      return Size(w,h);
+    }
+
     cv::Mat drawSonar(const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg) {
 
       const int nRanges = msg->ranges.size();
       const int nBeams = msg->bearings.size();
       const int nIntensities = msg->v2intensities.size();
 
-      cv::Mat mat(500, 1000, CV_8UC3, Scalar(0.0, 0.0, 0.0));
+      const cv::Size sz = calculateImageSize( msg );
+      cv::Mat mat( sz, CV_8UC3, Scalar(0.0, 0.0, 0.0));
 
-      const unsigned int radius = mat.size().width / 2;
-      const cv::Point origin(radius, mat.size().height);
+      const unsigned int radius = mat.size().height;
+      const cv::Point origin(mat.size().width/2, mat.size().height);
 
       const float binThickness = 3 * ceil(radius / nRanges);
 
@@ -123,8 +154,8 @@ namespace oculus_sonar {
       for (unsigned int r = 0; r < nRanges; ++r) {
         for (unsigned int b = 0; b < nBeams; ++b) {
 
-          float range = msg->ranges[r];
-          uint8_t intensity = msg->v2intensities[(r * nBeams) + b];
+          const float range = msg->ranges[r];
+          const uint8_t intensity = msg->v2intensities[(r * nBeams) + b];
 
           const float begin = angles[b].begin + ThetaShift,
                       end = angles[b].end + ThetaShift;
@@ -149,6 +180,8 @@ namespace oculus_sonar {
     ros::Subscriber sub_;
     ros::Publisher pub_;
     int _counter;
+
+    int _height, _width;
 
 
     struct ColorMap {
