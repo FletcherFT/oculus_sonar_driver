@@ -9,7 +9,7 @@
   <arg name="freqMode" default="2"/>
   <arg name="ipAddress" default="auto"/>
 
-  <node pkg="oculus_sonar_ros" type="oculus_publisher" name="oculus_publisher" output="screen" launch-prefix="gdb -ex run --args">
+  <node pkg="oculus_sonar_ros" type="oculus_driver" name="oculus_driver" output="screen">
     <param name="ipAddress" value="$(arg ipAddress)"/>
     <param name="range" value="$(arg range)"/>
     <param name="pingRate" value="$(arg pingRate)"/>
