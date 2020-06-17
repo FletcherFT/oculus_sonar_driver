@@ -86,7 +86,7 @@ namespace oculus_sonar {
       header.stamp = ros::Time::now();
 
       cv_bridge::CvImage img_bridge(header,
-                                    sensor_msgs::image_encodings::BGR8,
+                                    sensor_msgs::image_encodings::RGB8,
                                     mat);
 
       sensor_msgs::Image output_msg;
@@ -96,100 +96,6 @@ namespace oculus_sonar {
       _counter++;
     }
 
-    // cv::Size calculateImageSize( const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg ) {
-    //
-    //   int h = _height, w = _width;
-    //
-    //   if( _width <= 0 ) {
-    //     const int height = _height;
-    //
-    //     if( _height <= 0 ) {
-    //         h = msg->ranges.size() * _pixPerRangeBin;
-    //     }
-    //
-    //     // Assume bearings are symmetric plus and minus
-    //     // Also assumes bearings are degrees
-    //     w = 2*fabs(h*sin( M_PI/180 * msg->bearings[0] ));
-    //
-    //   } else if( _height <= 0 ) {
-    //     h = (w/2) / fabs(sin( M_PI/180 * msg->bearings[0]));
-    //   }
-    //
-    //   return Size(w,h);
-    // }
-    //
-    // cv::Mat drawSonar(const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg) {
-    //
-    //   const int nRanges = msg->ranges.size();
-    //   const int nBeams = msg->bearings.size();
-    //
-    //   const cv::Size sz = calculateImageSize( msg );
-    //   cv::Mat mat( sz, CV_8UC3, Scalar(0.0, 0.0, 0.0));
-    //
-    //   const unsigned int radius = mat.size().height;
-    //   const cv::Point origin(mat.size().width/2, mat.size().height);
-    //
-    //   const float binThickness = 3 * ceil(radius / nRanges);
-    //
-    //   // Current ImagingSonarMsg data is in _degrees_
-    //   struct BearingEntry {
-    //       float begin, center, end;
-    //
-    //       BearingEntry( float b, float c, float e )
-    //         : begin( b ), center(c), end(e)
-    //           {;}
-    //   };
-    //
-    //   vector<BearingEntry> angles;
-    //   angles.reserve( nBeams );
-    //
-    //   for (unsigned int b = 0; b < nBeams; ++b) {
-    //     const float center = msg->bearings[b];
-    //     float begin = 0.0, end = 0.0;
-    //
-    //     if (b == 0) {
-    //
-    //       end = (msg->bearings[b + 1] + center) / 2.0;
-    //       begin = 2 * center - end;
-    //
-    //     } else if (b == nBeams - 1) {
-    //
-    //       begin = angles[b - 1].end;
-    //       end = 2 * center - begin;
-    //
-    //     } else {
-    //
-    //       begin = angles[b - 1].end;
-    //       end = (msg->bearings[b + 1] + center) / 2.0;
-    //     }
-    //
-    //     angles.push_back( BearingEntry(begin, center, end) );
-    //   }
-    //
-    //   for (unsigned int r = 0; r < nRanges; ++r) {
-    //     for (unsigned int b = 0; b < nBeams; ++b) {
-    //
-    //       const float range = msg->ranges[r];
-    //       const uint8_t intensity = msg->v2intensities[(r * nBeams) + b];
-    //
-    //       const float begin = angles[b].begin + ThetaShift,
-    //                   end = angles[b].end + ThetaShift;
-    //
-    //       const float rad = float(radius * r) / nRanges;
-    //
-    //       const float fudge = 0; // in degrees
-    //
-    //       // Assume angles are in image frame x-right, y-down
-    //       cv::ellipse(mat, origin, cv::Size(rad, rad), 0,
-    //                   begin, end,
-    //                   255*_colorMap->color( angles[b].center, range, intensity ),
-    //                   binThickness * 1.4);
-    //     }
-    //   }
-    //
-    //   return mat;
-    //
-    // }
 
     ros::Subscriber sub_;
     ros::Publisher pub_;
