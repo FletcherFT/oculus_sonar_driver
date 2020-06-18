@@ -51,41 +51,41 @@ void OculusDriver::onInit() {
 
 
 // Processes and publishes sonar pings to a ROS topic
-void OculusDriver::pingCallback(const shared_ptr<SimplePingResult> &ping) {
+void OculusDriver::pingCallback(const SimplePingResult &ping) {
 
   imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
   oculus_sonar_ros::OculusSonarRawMsg raw_msg;
 
   // from aaron's OculusSonarBase.cpp
-  sonar_msg.header.seq = ping->oculusPing()->pingId;
+  sonar_msg.header.seq = ping.oculusPing()->pingId;
   sonar_msg.header.stamp = ros::Time::now();
 
   raw_msg.header.seq = sonar_msg.header.seq;
   raw_msg.header.stamp = sonar_msg.header.stamp;
 
-  sonar_msg.frequency = ping->oculusPing()->frequency;
+  sonar_msg.frequency = ping.oculusPing()->frequency;
 
-  const int nBearings = ping->oculusPing()->nBeams;
-  const int nRanges = ping->oculusPing()->nRanges;
+  const int nBearings = ping.oculusPing()->nBeams;
+  const int nRanges = ping.oculusPing()->nRanges;
 
   for( unsigned int b = 0; b < nBearings; b++ ) {
-    sonar_msg.bearings.push_back( ping->bearings().at( b ) );
+    sonar_msg.bearings.push_back( ping.bearings().at( b ) );
   }
 
   for( unsigned int i = 0; i < nRanges; i++ ) {
-    sonar_msg.ranges.push_back( float(i+0.5) * ping->oculusPing()->rangeResolution );
+    sonar_msg.ranges.push_back( float(i+0.5) * ping.oculusPing()->rangeResolution );
   }
 
   for( unsigned int r = 0; r < nRanges; r++ ) {
     for( unsigned int b = 0; b < nBearings; b++ ) {
-      sonar_msg.v2intensities.push_back( ping->image().at(b,r) );
+      sonar_msg.v2intensities.push_back( ping.image().at(b,r) );
     }
   }
   _imagingSonarPub.publish(sonar_msg);
 
-  auto rawSize = ping->buffer()->size();
+  auto rawSize = ping.size();
   raw_msg.data.resize( rawSize );
-  memcpy( raw_msg.data.data(), ping->buffer()->ptr(), rawSize );
+  memcpy( raw_msg.data.data(), ping.ptr(), rawSize );
   _oculusRawPub.publish( raw_msg );
 }
 

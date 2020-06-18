@@ -37,7 +37,7 @@ public:
   // will have publisher, dataRx, statusRx, all as class fields
   // -> don't need to pass things in methods
 
-  void pingCallback(const shared_ptr<SimplePingResult> &ping);
+  void pingCallback(const SimplePingResult &ping);
 
   void configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level);
   void reconfigListener();
