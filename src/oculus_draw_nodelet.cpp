@@ -62,15 +62,16 @@ namespace oculus_sonar {
   private:
 
     virtual void onInit() {
-      ros::NodeHandle nh = getNodeHandle();
+      ros::NodeHandle nh = getMTNodeHandle();
+      ros::NodeHandle pnh = getMTPrivateNodeHandle();
 
       nh.param<int>("width", _width, 0);
       nh.param<int>("height", _height, 0);
       nh.param<int>("pix_per_range_bin", _pixPerRangeBin, 2 );
 
-      sub_ = nh.subscribe("imaging_sonar", 10, &OculusDrawNodelet::imagingSonarCallback, this );
+      sub_ = pnh.subscribe("imaging_sonar", 10, &OculusDrawNodelet::imagingSonarCallback, this );
 
-      pub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar", 10);
+      pub_ = pnh.advertise<sensor_msgs::Image>("drawn_sonar", 10);
     }
 
     void imagingSonarCallback(const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg) {
