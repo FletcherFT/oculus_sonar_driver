@@ -18,22 +18,24 @@ using namespace cv;
 #include "g3_to_ros_logger/g3logger.h"
 #include <iostream>
 
-#include "serdp_common/ColorMaps.h"
-#include "serdp_common/DataStructures.h"
-#include "serdp_common/DrawSonar.h"
+#include "draw_sonar/ColorMaps.h"
+#include "draw_sonar/DataStructures.h"
+#include "draw_sonar/DrawSonar.h"
 
 
 // Subscribes to sonar message topic, draws using opencv then publishes result
 
 namespace oculus_sonar {
 
-  struct ImagingSonarMsgInterface : public serdp_common::AbstractSonarInterface {
+  struct ImagingSonarMsgInterface : public draw_sonar::AbstractSonarInterface {
 
     ImagingSonarMsgInterface( const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &ping )
       : _ping(ping) {;}
 
     virtual int nBearings() const         { return _ping->bearings.size(); }
-    virtual float bearing( int n ) const  { return _ping->bearings[n]; }
+
+    // Remember that the _original_ ImagingSonarMsg stored bearings as degrees
+    virtual float bearing( int n ) const  { return _ping->bearings[n] * M_PI/180; }
 
     virtual int nRanges() const           { return _ping->ranges.size(); }
     virtual float range( int n ) const    { return _ping->ranges[n]; }
@@ -47,13 +49,13 @@ namespace oculus_sonar {
   class OculusDrawNodelet : public nodelet::Nodelet {
   public:
 
-    // NB Color Maps are in the serdp_common package
+    // NB Color Maps are in the draw_sonar package
 
     OculusDrawNodelet()
       : Nodelet(),
         _counter(0),
         _height(0), _width(0), _pixPerRangeBin(2),
-        _colorMap( new serdp_common::InfernoColorMap )
+        _colorMap( new draw_sonar::InfernoColorMap )
     {;}
 
     virtual ~OculusDrawNodelet()
@@ -77,9 +79,9 @@ namespace oculus_sonar {
     void imagingSonarCallback(const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg) {
 
       ImagingSonarMsgInterface interface( msg );
-      cv::Size sz = serdp_common::calculateImageSize( interface, cv::Size( _width, _height), _pixPerRangeBin );
+      cv::Size sz = draw_sonar::calculateImageSize( interface, cv::Size( _width, _height), _pixPerRangeBin );
       cv::Mat mat( sz, CV_8UC3 );
-      serdp_common::drawSonar( interface, mat, *_colorMap );
+      draw_sonar::drawSonar( interface, mat, *_colorMap );
 
       // Convert and publish drawn sonar images
       std_msgs::Header header;
@@ -104,7 +106,7 @@ namespace oculus_sonar {
 
     int _height, _width, _pixPerRangeBin;
 
-    std::unique_ptr< serdp_common::SonarColorMap > _colorMap;
+    std::unique_ptr< draw_sonar::SonarColorMap > _colorMap;
 
   };
 

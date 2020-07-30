@@ -25,6 +25,7 @@
   <depend>serdp_common</depend>
   <depend>liboculus</depend>
   <depend>image_transport</depend>
+  <depend>draw_sonar</depend>
   <depend>nodelet</depend>
   <depend>nodelet_topic_tools</depend>
 

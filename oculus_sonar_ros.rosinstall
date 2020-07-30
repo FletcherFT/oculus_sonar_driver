@@ -2,4 +2,4 @@
 - git: {local-name: g3log_catkin, uri: "https://gitlab.com/apl-ocean-engineering/lsd-slam/g3log_catkin.git", version: master}
 - git: {local-name: active_object, uri: "https://github.com/apl-ocean-engineering/libactiveobject.git", version: ros}
 - git: {local-name: liboculus, uri: "https://github.com/apl-ocean-engineering/liboculus.git", version: master}
-- git: {local-name: serdp_common, uri: "https://github.com/apl-ocean-engineering/serdp_common.git", version: master}
+- git: {local-name: libdraw_sonar, uri: "https://github.com/apl-ocean-engineering/libdraw_sonar.git", version: master}

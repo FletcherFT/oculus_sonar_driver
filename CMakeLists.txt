@@ -5,18 +5,6 @@ project(oculus_sonar_ros)
 
 set(OpenCV_DIR /usr/share/OpenCV/)
 
-
-#set( SCALE_FACTOR "250")
-#add_definitions( -DSCALE_FACTOR=${SCALE_FACTOR} )
-
-#OPTION(THETA_SHIFT_DEGREES "Define " ON) # Enabled by default
-#if(THETA_SHIFT_DEGREES)
-#	add_definitions( -DTHETA_SHIFT=90 )
-#else()
-#	add_definitions( -DTHETA_SHIFT=${PI} )
-#endif()
-
-
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
   cmake_modules
@@ -29,13 +17,13 @@ find_package(catkin REQUIRED COMPONENTS
   liboculus REQUIRED
   serdp_common
   rospy
-  OpenCV
   dynamic_reconfigure
   image_transport
   sensor_msgs
   message_generation
 	nodelet
 	nodelet_topic_tools
+  draw_sonar
 )
 
 ## Build messages
