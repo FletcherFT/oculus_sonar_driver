@@ -25,10 +25,11 @@ void OculusDriver::onInit() {
   ros::NodeHandle n_(getMTNodeHandle());
   ros::NodeHandle pn_(getMTPrivateNodeHandle());
 
-  NODELET_INFO_STREAM("Advertising topics in namespace " << pn_.getNamespace() );
+  NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace() );
+  //const std::string nodelet_name( getName() );
 
-  _imagingSonarPub = pn_.advertise<imaging_sonar_msgs::ImagingSonarMsg>("imaging_sonar", 100);
-  _oculusRawPub = pn_.advertise<oculus_sonar_ros::OculusSonarRawMsg>("oculus_raw", 100);
+  _imagingSonarPub = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>( "imaging_sonar", 100);
+  _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>( "oculus_raw", 100);
 
   // This should be unnecessary, we should get a dynamic reconfigure callback
   // almost immediately with the params values.
@@ -44,6 +45,8 @@ void OculusDriver::onInit() {
   // ni_.param<int>("freqMode", freqMode, 2);
 
   pn_.param<string>("ipAddress", _ipAddress, "auto");
+
+  NODELET_INFO_STREAM("Opening sonar at " << _ipAddress );
 
   _sonarClient.reset( new SonarClient( sonarConfig, _ipAddress) );
   _sonarClient->setDataRxCallback( std::bind( &OculusDriver::pingCallback, this, std::placeholders::_1 ) );
