@@ -9,9 +9,6 @@ using std::string;
 
 #include <memory>
 
-// Sonar ROS message that aaron made
-#include <imaging_sonar_msgs/ImagingSonarMsg.h>
-
 // Used to get sonar ping info
 #include "liboculus/SimplePingResult.h"
 #include "liboculus/SonarClient.h"

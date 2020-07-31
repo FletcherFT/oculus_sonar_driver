@@ -1,6 +1,7 @@
 #include "ros/ros.h"
 #include "nodelet/nodelet.h"
 
+#include "imaging_sonar_msgs/SonarImage.h"
 #include "imaging_sonar_msgs/ImagingSonarMsg.h"
 
 #include <opencv2/core/core.hpp>
@@ -27,6 +28,7 @@ using namespace cv;
 
 namespace oculus_sonar {
 
+  // \todo These two can be clean up with templates...
   struct ImagingSonarMsgInterface : public draw_sonar::AbstractSonarInterface {
 
     ImagingSonarMsgInterface( const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &ping )
@@ -43,6 +45,23 @@ namespace oculus_sonar {
     virtual uint8_t intensity( int i ) const { return _ping->v2intensities[i]; }
 
     imaging_sonar_msgs::ImagingSonarMsg::ConstPtr _ping;
+  };
+
+  struct SonarImageMsgInterface : public draw_sonar::AbstractSonarInterface {
+
+    SonarImageMsgInterface( const imaging_sonar_msgs::SonarImage::ConstPtr &ping )
+      : _ping(ping) {;}
+
+    virtual int nBearings() const         { return _ping->azimuth_angles.size(); }
+
+    virtual float bearing( int n ) const  { return _ping->azimuth_angles[n];  }
+
+    virtual int nRanges() const           { return _ping->ranges.size(); }
+    virtual float range( int n ) const    { return _ping->ranges[n]; }
+
+    virtual uint8_t intensity( int i ) const { return _ping->intensities[i]; }
+
+    imaging_sonar_msgs::SonarImage::ConstPtr _ping;
   };
 
 
@@ -72,9 +91,35 @@ namespace oculus_sonar {
       pnh.param<int>("height", _height, 0);
       pnh.param<int>("pix_per_range_bin", _pixPerRangeBin, 2 );
 
-      sub_ = nh.subscribe("imaging_sonar", 10, &OculusDrawNodelet::imagingSonarCallback, this );
+      subSonarImage_ = nh.subscribe<imaging_sonar_msgs::SonarImage>("sonar_image", 10, &OculusDrawNodelet::sonarImageCallback, this );
+      //subImagingSonarMsg_ = nh.subscribe<imaging_sonar_msgs::ImagingSonarMsg>("imaging_sonar", 10, &OculusDrawNodelet::imagingSonarCallback, this );
+
 
       pub_ = nh.advertise<sensor_msgs::Image>("drawn_sonar", 10);
+    }
+
+    // \todo Fix the DRY
+    void sonarImageCallback(const imaging_sonar_msgs::SonarImage::ConstPtr &msg) {
+
+      SonarImageMsgInterface interface( msg );
+      cv::Size sz = draw_sonar::calculateImageSize( interface, cv::Size( _width, _height), _pixPerRangeBin );
+      cv::Mat mat( sz, CV_8UC3 );
+      draw_sonar::drawSonar( interface, mat, *_colorMap );
+
+      // Convert and publish drawn sonar images
+      std_msgs::Header header;
+      header.seq = _counter;
+      header.stamp = ros::Time::now();
+
+      cv_bridge::CvImage img_bridge(header,
+                                    sensor_msgs::image_encodings::RGB8,
+                                    mat);
+
+      sensor_msgs::Image output_msg;
+      img_bridge.toImageMsg(output_msg);
+      pub_.publish(output_msg);
+
+      _counter++;
     }
 
     void imagingSonarCallback(const imaging_sonar_msgs::ImagingSonarMsg::ConstPtr &msg) {
@@ -101,7 +146,7 @@ namespace oculus_sonar {
     }
 
 
-    ros::Subscriber sub_;
+    ros::Subscriber subSonarImage_, subImagingSonarMsg_;
     ros::Publisher pub_;
     int _counter;
 

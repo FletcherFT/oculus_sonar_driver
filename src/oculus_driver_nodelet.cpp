@@ -4,6 +4,8 @@
 
 #include <boost/asio.hpp>
 
+#include <imaging_sonar_msgs/SonarImage.h>
+
 
 namespace oculus_sonar {
 
@@ -28,7 +30,7 @@ void OculusDriver::onInit() {
   NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace() );
   //const std::string nodelet_name( getName() );
 
-  _imagingSonarPub = n_.advertise<imaging_sonar_msgs::ImagingSonarMsg>( "imaging_sonar", 100);
+  _imagingSonarPub = n_.advertise<imaging_sonar_msgs::SonarImage>( "sonar_image", 100);
   _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>( "oculus_raw", 100);
 
   // This should be unnecessary, we should get a dynamic reconfigure callback
@@ -58,7 +60,7 @@ void OculusDriver::onInit() {
 // Processes and publishes sonar pings to a ROS topic
 void OculusDriver::pingCallback(const SimplePingResult &ping) {
 
-  imaging_sonar_msgs::ImagingSonarMsg sonar_msg;
+  imaging_sonar_msgs::SonarImage sonar_msg;
   oculus_sonar_ros::OculusSonarRawMsg raw_msg;
 
   // from aaron's OculusSonarBase.cpp
@@ -70,20 +72,33 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
 
   sonar_msg.frequency = ping.oculusPing()->frequency;
 
+  // \todo This is actually frequency dependent
+  if( sonar_msg.frequency > 2000000 ) {
+    sonar_msg.azimuth_beamwidth = 0.4*M_PI/180;
+    sonar_msg.elevation_beamwidth = 12*M_PI/180;
+  } else if( (sonar_msg.frequency > 1100000) && (sonar_msg.frequency < 1300000) ){
+    sonar_msg.azimuth_beamwidth = 0.6*M_PI/180;
+    sonar_msg.elevation_beamwidth = 20*M_PI/180;
+  }
+
   const int nBearings = ping.oculusPing()->nBeams;
   const int nRanges = ping.oculusPing()->nRanges;
 
   for( unsigned int b = 0; b < nBearings; b++ ) {
-    sonar_msg.bearings.push_back( ping.bearings().at( b ) );
+    sonar_msg.azimuth_angles.push_back( ping.bearings().at( b ) * M_PI/180 );
   }
 
   for( unsigned int i = 0; i < nRanges; i++ ) {
     sonar_msg.ranges.push_back( float(i+0.5) * ping.oculusPing()->rangeResolution );
   }
 
+  // Bytes for right now
+  sonar_msg.is_bigendian = false;
+  sonar_msg.data_size = 1;
+
   for( unsigned int r = 0; r < nRanges; r++ ) {
     for( unsigned int b = 0; b < nBearings; b++ ) {
-      sonar_msg.v2intensities.push_back( ping.image().at(b,r) );
+      sonar_msg.intensities.push_back( ping.image().at(b,r) );
     }
   }
   _imagingSonarPub.publish(sonar_msg);
