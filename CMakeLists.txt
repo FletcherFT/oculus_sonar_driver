@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   g3log_catkin
   active_object
   liboculus REQUIRED
-  serdp_common
   rospy
   dynamic_reconfigure
   image_transport

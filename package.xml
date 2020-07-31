@@ -22,7 +22,6 @@
   <depend>imaging_sonar_msgs</depend>
   <depend>g3log_catkin</depend>
   <depend>active_object</depend>
-  <depend>serdp_common</depend>
   <depend>liboculus</depend>
   <depend>image_transport</depend>
   <depend>draw_sonar</depend>
