@@ -59,7 +59,18 @@ namespace oculus_sonar {
     virtual int nRanges() const           { return _ping->ranges.size(); }
     virtual float range( int n ) const    { return _ping->ranges[n]; }
 
-    virtual uint8_t intensity( int i ) const { return _ping->intensities[i]; }
+    virtual uint8_t intensity( int i ) const {
+      return 0;
+      
+      // Somewhat hacky
+      if( _ping->data_size == 1 ) {
+        return _ping->intensities[i];
+      } else if( _ping->data_size == 2 ) {
+        return _ping->intensities[i * 2] >> 8;
+      }
+
+      return 0;
+    }
 
     imaging_sonar_msgs::SonarImage::ConstPtr _ping;
   };
@@ -102,6 +113,7 @@ namespace oculus_sonar {
     void sonarImageCallback(const imaging_sonar_msgs::SonarImage::ConstPtr &msg) {
 
       SonarImageMsgInterface interface( msg );
+
       cv::Size sz = draw_sonar::calculateImageSize( interface, cv::Size( _width, _height), _pixPerRangeBin );
       cv::Mat mat( sz, CV_8UC3 );
       draw_sonar::drawSonar( interface, mat, *_colorMap );
