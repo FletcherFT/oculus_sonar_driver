@@ -60,16 +60,22 @@ namespace oculus_sonar {
     virtual float range( int n ) const    { return _ping->ranges[n]; }
 
     virtual uint8_t intensity( int i ) const {
-      return 0;
-      
-      // Somewhat hacky
-      if( _ping->data_size == 1 ) {
-        return _ping->intensities[i];
-      } else if( _ping->data_size == 2 ) {
-        return _ping->intensities[i * 2] >> 8;
+      if( _ping->data_size == 2 ) {
+        uint16_t d;
+
+        if( _ping->is_bigendian)
+          d = (_ping->intensities[i * 2] << 8) | _ping->intensities[i * 2 + 1];
+        else
+          d =  (_ping->intensities[i * 2 + 1] << 8) | _ping->intensities[i * 2];
+
+          // Hacky
+          const int shift = 6;
+          if( d >= (0x1 << (shift+8)) ) return 0xFF;
+
+        return (d >> shift);
       }
 
-      return 0;
+      return _ping->intensities[i];
     }
 
     imaging_sonar_msgs::SonarImage::ConstPtr _ping;
