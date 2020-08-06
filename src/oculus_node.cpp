@@ -11,7 +11,7 @@ int main(int argc, char **argv){
 
   std::string nodelet_name = ros::this_node::getName();
   nodelet.load(nodelet_name + "/driver", "oculus_sonar/driver", remap, nargv);
-  nodelet.load(nodelet_name + "/draw", "oculus_sonar/draw", remap, nargv);
+  nodelet.load(nodelet_name + "/draw", "draw_sonar", remap, nargv);
 
   ros::spin();
   return 0;

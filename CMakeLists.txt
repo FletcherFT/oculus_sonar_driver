@@ -61,34 +61,15 @@ class_loader_hide_library_symbols(oculus_driver_nodelet)
 
 add_executable(oculus_driver src/oculus_node.cpp)
 target_link_libraries(oculus_driver
-   oculus_draw_nodelet
    ${catkin_LIBRARIES} )
 add_dependencies(oculus_driver
    ${catkin_EXPORTED_TARGETS}
  	 ${oculus_sonar_ros}_gencfg )
 
-
-add_library(oculus_draw_nodelet src/oculus_draw_nodelet.cpp )
-target_link_libraries(oculus_draw_nodelet ${catkin_LIBRARIES})
-class_loader_hide_library_symbols(oculus_draw_nodelet)
-
-add_executable(oculus_draw src/oculus_draw_node.cpp)
-target_link_libraries(oculus_draw
-   oculus_draw_nodelet
-   ${catkin_LIBRARIES})
-add_dependencies(oculus_draw
-   ${catkin_EXPORTED_TARGETS})
-
-# add_executable(oculus_draw src/oculus_draw.cpp)
-# target_link_libraries(oculus_draw  ${catkin_LIBRARIES})
-
-add_executable(sonar_img_view src/sonar_img_view.cpp)
-target_link_libraries(sonar_img_view  ${catkin_LIBRARIES})
-
-install(TARGETS oculus_draw oculus_driver
+install(TARGETS oculus_driver
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} )
 
-install(TARGETS oculus_draw_nodelet oculus_driver_nodelet
+install(TARGETS oculus_driver_nodelet
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
