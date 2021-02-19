@@ -16,12 +16,12 @@
 
   <exec_depend>roscpp</exec_depend>
 
+  <depend>acoustic_msgs</depend>
   <depend>active_object</depend>
   <depend>cv_bridge</depend>
   <depend>draw_sonar</depend>
   <depend>g3log_catkin</depend>
   <depend>image_transport</depend>
-  <depend>imaging_sonar_msgs</depend>
   <depend>liboculus</depend>
   <depend>nodelet</depend>
   <depend>nodelet_topic_tools</depend>

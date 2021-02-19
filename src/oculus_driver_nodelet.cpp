@@ -4,7 +4,7 @@
 
 #include <boost/asio.hpp>
 
-#include <imaging_sonar_msgs/SonarImage.h>
+#include <acoustic_msgs/SonarImage.h>
 
 
 namespace oculus_sonar {
@@ -30,7 +30,7 @@ void OculusDriver::onInit() {
   NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace() );
   //const std::string nodelet_name( getName() );
 
-  _imagingSonarPub = n_.advertise<imaging_sonar_msgs::SonarImage>( "sonar_image", 100);
+  _imagingSonarPub = n_.advertise<acoustic_msgs::SonarImage>( "sonar_image", 100);
   _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>( "oculus_raw", 100);
 
   // This should be unnecessary, we should get a dynamic reconfigure callback
@@ -60,7 +60,9 @@ void OculusDriver::onInit() {
 // Processes and publishes sonar pings to a ROS topic
 void OculusDriver::pingCallback(const SimplePingResult &ping) {
 
-  imaging_sonar_msgs::SonarImage sonar_msg;
+  acoustic_msgs::SonarImage sonar_msg;
+  // TODO: It might make sense to have a generic "raw data" message type,
+  //       used for all relevant hardware.
   oculus_sonar_ros::OculusSonarRawMsg raw_msg;
 
   // from aaron's OculusSonarBase.cpp

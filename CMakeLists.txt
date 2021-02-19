@@ -8,6 +8,7 @@ set(OpenCV_DIR /usr/share/OpenCV/)
 
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
+  acoustic_msgs
   active_object
   cmake_modules
   cv_bridge
@@ -15,7 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   g3log_catkin
   image_transport
-  imaging_sonar_msgs
   liboculus REQUIRED
   message_generation
   nodelet
