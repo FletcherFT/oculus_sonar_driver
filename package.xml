@@ -16,17 +16,17 @@
 
   <exec_depend>roscpp</exec_depend>
 
-  <depend>rospy</depend>
-  <depend>cv_bridge</depend>
-  <depend>std_msgs</depend>
-  <depend>imaging_sonar_msgs</depend>
-  <depend>g3log_catkin</depend>
   <depend>active_object</depend>
-  <depend>liboculus</depend>
-  <depend>image_transport</depend>
+  <depend>cv_bridge</depend>
   <depend>draw_sonar</depend>
+  <depend>g3log_catkin</depend>
+  <depend>image_transport</depend>
+  <depend>imaging_sonar_msgs</depend>
+  <depend>liboculus</depend>
   <depend>nodelet</depend>
   <depend>nodelet_topic_tools</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelet_plugins.xml" />

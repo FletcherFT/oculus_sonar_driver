@@ -8,22 +8,22 @@ set(OpenCV_DIR /usr/share/OpenCV/)
 
 # Standard dependencies
 find_package(catkin REQUIRED COMPONENTS
+  active_object
   cmake_modules
   cv_bridge
-  roscpp
-  std_msgs
-  imaging_sonar_msgs
-  g3log_catkin
-  active_object
-  liboculus REQUIRED
-  rospy
-  dynamic_reconfigure
-  image_transport
-  sensor_msgs
-  message_generation
-	nodelet
-	nodelet_topic_tools
   draw_sonar
+  dynamic_reconfigure
+  g3log_catkin
+  image_transport
+  imaging_sonar_msgs
+  liboculus REQUIRED
+  message_generation
+  nodelet
+  nodelet_topic_tools
+  roscpp
+  rospy
+  sensor_msgs
+  std_msgs
 )
 
 ## Build messages
