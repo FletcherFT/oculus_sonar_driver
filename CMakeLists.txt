@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(oculus_sonar_ros)
+
 ## Compile as C++11, supported in ROS Kinetic and newer
 #add_compile_options(-std=c++14)
 
@@ -61,10 +62,12 @@ class_loader_hide_library_symbols(oculus_driver_nodelet)
 
 add_executable(oculus_driver src/oculus_node.cpp)
 target_link_libraries(oculus_driver
-   ${catkin_LIBRARIES} )
+  ${catkin_LIBRARIES}
+)
 add_dependencies(oculus_driver
-   ${catkin_EXPORTED_TARGETS}
- 	 ${oculus_sonar_ros}_gencfg )
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg
+)
 
 install(TARGETS oculus_driver
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} )
