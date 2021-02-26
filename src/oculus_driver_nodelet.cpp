@@ -28,7 +28,6 @@ void OculusDriver::onInit() {
   ros::NodeHandle pn_(getMTPrivateNodeHandle());
 
   NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace() );
-  //const std::string nodelet_name( getName() );
 
   _imagingSonarPub = n_.advertise<acoustic_msgs::SonarImage>( "sonar_image", 100);
   _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>( "oculus_raw", 100);
@@ -115,7 +114,8 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
 }
 
 // Updates sonar parameters
-void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level) {
+void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config,
+	                          uint32_t level) {
 
   sonarConfig.postponeCallback();
 
