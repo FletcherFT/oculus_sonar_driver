@@ -120,7 +120,7 @@ void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config,
   sonarConfig.postponeCallback();
 
   ROS_INFO_STREAM("Setting sonar range to " << config.range << " m");
-  sonarConfig.setRange( config.range);
+  sonarConfig.setRange(config.range);
 
   ROS_INFO_STREAM("Setting gain to " << config.gain << " pct");
   sonarConfig.setGainPercent(config.gain);
@@ -128,11 +128,23 @@ void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config,
   ROS_INFO_STREAM("Setting gamma to " << config.gamma);
   sonarConfig.setGamma(config.gamma);
 
-  ROS_INFO_STREAM("Setting ping rate to (" << config.pingRate << "): " << PingRateToHz(config.pingRate) << " Hz" );
+  ROS_INFO_STREAM("Setting ping rate to (" << config.pingRate << "): "
+		  << PingRateToHz(config.pingRate) << " Hz" );
   sonarConfig.setPingRate( static_cast<PingRateType>(config.pingRate) );
 
   ROS_INFO_STREAM("Setting freq mode to " << FreqModeToString( config.freqMode) );
   sonarConfig.setFreqMode( static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode) );
+
+  // I would prefer to just or some consts together, but didn't see a clean
+  // way to do that within dynamic reconfig. Ugly works.
+  uint8_t flags = 0;
+  if (config.range_as_meters)    flags += 1;
+  if (config.data_16bit)         flags += 2;
+  if (config.send_gain)          flags += 4;
+  if (config.send_simple_return) flags += 8;
+  if (config.gain_assistance)    flags += 16;
+  ROS_INFO_STREAM("Setting flags to " << std::hex << flags);
+  sonarConfig.setFlags(flags);
 
   sonarConfig.enableCallback();
   // No need for sendCallback() because it is called by enableCallback.
