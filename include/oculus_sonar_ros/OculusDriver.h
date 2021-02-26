@@ -42,11 +42,12 @@ public:
 
 private:
 
-  virtual void onInit();
+  void onInit() override;
 
   std::unique_ptr< SonarClient > _sonarClient;
 
-  ros::Publisher _imagingSonarPub, _oculusRawPub;
+  ros::Publisher _imagingSonarPub;
+  ros::Publisher _oculusRawPub;
   std::string _ipAddress;
 
   SonarConfiguration sonarConfig;

@@ -28,7 +28,6 @@ void OculusDriver::onInit() {
   ros::NodeHandle pn_(getMTPrivateNodeHandle());
 
   NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace() );
-  //const std::string nodelet_name( getName() );
 
   _imagingSonarPub = n_.advertise<acoustic_msgs::SonarImage>( "sonar_image", 100);
   _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>( "oculus_raw", 100);
@@ -115,7 +114,8 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
 }
 
 // Updates sonar parameters
-void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level) {
+void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config,
+	                          uint32_t level) {
 
   sonarConfig.postponeCallback();
 
@@ -134,29 +134,9 @@ void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config, u
   ROS_INFO_STREAM("Setting freq mode to " << FreqModeToString( config.freqMode) );
   sonarConfig.setFreqMode( static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode) );
 
-  sonarConfig.sendCallback();
+  sonarConfig.enableCallback();
+  // No need for sendCallback() because it is called by enableCallback.
 }
-
-// // Set up dynamic reconfigure server in separate thread
-// void OculusDriver::reconfigListener() {
-//   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
-//   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
-//   f = boost::bind(&OculusDriver::configCallback, this, _1, _2);
-//   server.setCallback(f);
-//   ros::spin();
-// }
-
-// int main(int argc, char **argv) {
-//   libg3logger::G3Logger<ROSLogSink> logWorker(argv[0]);
-//   logWorker.logBanner();
-//   logWorker.verbose(2);
-//
-//   ros::init(argc, argv, "oculus_node");
-//
-//   _imagingSonarPubnode.run();
-//
-//   return 0;
-// }
 
 };
 
