@@ -134,7 +134,8 @@ void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config,
   ROS_INFO_STREAM("Setting freq mode to " << FreqModeToString( config.freqMode) );
   sonarConfig.setFreqMode( static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode) );
 
-  sonarConfig.sendCallback();
+  sonarConfig.enableCallback();
+  // No need for sendCallback() because it is called by enableCallback.
 }
 
 };
