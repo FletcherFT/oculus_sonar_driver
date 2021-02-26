@@ -59,19 +59,21 @@ void OculusDriver::onInit() {
 
 // Processes and publishes sonar pings to a ROS topic
 void OculusDriver::pingCallback(const SimplePingResult &ping) {
-
-  acoustic_msgs::SonarImage sonar_msg;
   // TODO: It might make sense to have a generic "raw data" message type,
   //       used for all relevant hardware.
   oculus_sonar_ros::OculusSonarRawMsg raw_msg;
 
-  // from aaron's OculusSonarBase.cpp
+  raw_msg.header.seq = ping.oculusPing()->pingId;
+  raw_msg.header.stamp = ros::Time::now();
+  auto rawSize = ping.size();
+  raw_msg.data.resize( rawSize );
+  memcpy( raw_msg.data.data(), ping.ptr(), rawSize );
+  _oculusRawPub.publish( raw_msg );
+
+  // Publish message parsed into the image format
+  acoustic_msgs::SonarImage sonar_msg;
   sonar_msg.header.seq = ping.oculusPing()->pingId;
-  sonar_msg.header.stamp = ros::Time::now();
-
-  raw_msg.header.seq = sonar_msg.header.seq;
-  raw_msg.header.stamp = sonar_msg.header.stamp;
-
+  sonar_msg.header.stamp = raw_msg.header.stamp;
   sonar_msg.frequency = ping.oculusPing()->frequency;
 
   // \todo This is actually frequency dependent
@@ -81,6 +83,11 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
   } else if( (sonar_msg.frequency > 1100000) && (sonar_msg.frequency < 1300000) ){
     sonar_msg.azimuth_beamwidth = 0.6*M_PI/180;
     sonar_msg.elevation_beamwidth = 20*M_PI/180;
+  } else {
+    ROS_ERROR_STREAM("Unsupported frequency received from oculus: "
+		     << sonar_msg.frequency << ". Not publishing SonarImage "
+		     << "for seq# " << raw_msg.header.seq);
+    return;
   }
 
   const int nBearings = ping.oculusPing()->nBeams;
@@ -105,10 +112,6 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
   }
   _imagingSonarPub.publish(sonar_msg);
 
-  auto rawSize = ping.size();
-  raw_msg.data.resize( rawSize );
-  memcpy( raw_msg.data.data(), ping.ptr(), rawSize );
-  _oculusRawPub.publish( raw_msg );
 }
 
 // Updates sonar parameters
