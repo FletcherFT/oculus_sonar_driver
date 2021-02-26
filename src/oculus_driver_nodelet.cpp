@@ -137,27 +137,6 @@ void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config, u
   sonarConfig.sendCallback();
 }
 
-// // Set up dynamic reconfigure server in separate thread
-// void OculusDriver::reconfigListener() {
-//   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> server;
-//   dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig>::CallbackType f;
-//   f = boost::bind(&OculusDriver::configCallback, this, _1, _2);
-//   server.setCallback(f);
-//   ros::spin();
-// }
-
-// int main(int argc, char **argv) {
-//   libg3logger::G3Logger<ROSLogSink> logWorker(argv[0]);
-//   logWorker.logBanner();
-//   logWorker.verbose(2);
-//
-//   ros::init(argc, argv, "oculus_node");
-//
-//   _imagingSonarPubnode.run();
-//
-//   return 0;
-// }
-
 };
 
 #include <pluginlib/class_list_macros.h>
