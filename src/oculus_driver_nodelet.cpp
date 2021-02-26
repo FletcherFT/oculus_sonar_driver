@@ -32,22 +32,12 @@ void OculusDriver::onInit() {
   _imagingSonarPub = n_.advertise<acoustic_msgs::SonarImage>( "sonar_image", 100);
   _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>( "oculus_raw", 100);
 
-  // This should be unnecessary, we should get a dynamic reconfigure callback
-  // almost immediately with the params values.
-  //
-  // Get parameter values from launch file.
-  // if no launch file was used, set equal to default values
-  // int range, gainPercent, gamma, pingRate, freqMode;
-  //
-  // ni_.param<int>("range", range, 2);
-  // ni_.param<int>("gainPercent", gainPercent, 50);
-  // ni_.param<int>("gamma", gamma, 127);
-  // ni_.param<int>("pingRate", pingRate, 0);
-  // ni_.param<int>("freqMode", freqMode, 2);
-
   pn_.param<string>("ipAddress", _ipAddress, "auto");
-
   NODELET_INFO_STREAM("Opening sonar at " << _ipAddress );
+
+  // It is not necessary to load any of the parameters controlled by
+  // dynamic reconfigure, since dynamic reconfigure will read them from
+  // the launch file and immediately publish an update message at launch.
 
   _sonarClient.reset( new SonarClient( sonarConfig, _ipAddress) );
   _sonarClient->setDataRxCallback( std::bind( &OculusDriver::pingCallback, this, std::placeholders::_1 ) );
@@ -143,7 +133,12 @@ void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config,
   if (config.send_gain)          flags += 4;
   if (config.send_simple_return) flags += 8;
   if (config.gain_assistance)    flags += 16;
-  ROS_INFO_STREAM("Setting flags to " << std::hex << flags);
+  ROS_INFO_STREAM("Setting flags: "
+                  << "\n   range is meters " << config.range_as_meters
+                  << "\n   data is 16 bit  " << config.data_16bit
+                  << "\n   send gain       " << config.send_gain
+                  << "\n   simple return   " << config.send_simple_return
+                  << "\n   gain assistance " << config.gain_assistance);
   sonarConfig.setFlags(flags);
 
   sonarConfig.enableCallback();
