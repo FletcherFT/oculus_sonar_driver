@@ -1,4 +1,4 @@
-#include "oculus_sonar_ros/OculusDriver.h"
+#include "oculus_sonar_driver/OculusDriver.h"
 #include "g3_to_ros_logger/ROSLogSink.h"
 #include "g3_to_ros_logger/g3logger.h"
 
@@ -30,7 +30,7 @@ void OculusDriver::onInit() {
   NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace() );
 
   _imagingSonarPub = n_.advertise<acoustic_msgs::SonarImage>( "sonar_image", 100);
-  _oculusRawPub = n_.advertise<oculus_sonar_ros::OculusSonarRawMsg>( "oculus_raw", 100);
+  _oculusRawPub = n_.advertise<oculus_sonar_driver::OculusSonarRawMsg>( "oculus_raw", 100);
 
   pn_.param<string>("ipAddress", _ipAddress, "auto");
   NODELET_INFO_STREAM("Opening sonar at " << _ipAddress );
@@ -50,7 +50,7 @@ void OculusDriver::onInit() {
 void OculusDriver::pingCallback(const SimplePingResult &ping) {
   // TODO: It might make sense to have a generic "raw data" message type,
   //       used for all relevant hardware.
-  oculus_sonar_ros::OculusSonarRawMsg raw_msg;
+  oculus_sonar_driver::OculusSonarRawMsg raw_msg;
 
   raw_msg.header.seq = ping.oculusPing()->pingId;
   raw_msg.header.stamp = ros::Time::now();
@@ -104,7 +104,7 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
 }
 
 // Updates sonar parameters
-void OculusDriver::configCallback(oculus_sonar_ros::OculusSonarConfig &config,
+void OculusDriver::configCallback(oculus_sonar_driver::OculusSonarConfig &config,
 	                          uint32_t level) {
 
   sonarConfig.postponeCallback();

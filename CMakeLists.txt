@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(oculus_sonar_ros)
+project(oculus_sonar_driver)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 #add_compile_options(-std=c++14)
@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   active_object
   cmake_modules
   cv_bridge
-  draw_sonar
+  sonar_image_proc
   dynamic_reconfigure
   g3log_catkin
   image_transport

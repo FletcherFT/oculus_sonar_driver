@@ -18,8 +18,8 @@ using std::string;
 #include <dynamic_reconfigure/server.h>
 
 // Auto-generated files
-#include "oculus_sonar_ros/OculusSonarRawMsg.h"
-#include "oculus_sonar_ros/OculusSonarConfig.h"
+#include "oculus_sonar_driver/OculusSonarRawMsg.h"
+#include "oculus_sonar_driver/OculusSonarConfig.h"
 
 namespace oculus_sonar {
 
@@ -36,7 +36,7 @@ public:
 
   void pingCallback(const SimplePingResult &ping);
 
-  void configCallback(oculus_sonar_ros::OculusSonarConfig &config, uint32_t level);
+  void configCallback(oculus_sonar_driver::OculusSonarConfig &config, uint32_t level);
   void reconfigListener();
   void run();
 
@@ -52,7 +52,7 @@ private:
 
   SonarConfiguration sonarConfig;
 
-  dynamic_reconfigure::Server<oculus_sonar_ros::OculusSonarConfig> _reconfigureServer;
+  dynamic_reconfigure::Server<oculus_sonar_driver::OculusSonarConfig> _reconfigureServer;
 
 };
 

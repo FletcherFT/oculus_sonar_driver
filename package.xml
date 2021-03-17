@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>oculus_sonar_ros</name>
+  <name>oculus_sonar_driver</name>
   <version>0.0.1</version>
   <description>ROS Package to interface with a Blueprint Subsea Oculus imaging sonar</description>
 
@@ -19,7 +19,7 @@
   <depend>acoustic_msgs</depend>
   <depend>active_object</depend>
   <depend>cv_bridge</depend>
-  <depend>draw_sonar</depend>
+  <depend>sonar_image_proc</depend>
   <depend>g3log_catkin</depend>
   <depend>image_transport</depend>
   <depend>liboculus</depend>
