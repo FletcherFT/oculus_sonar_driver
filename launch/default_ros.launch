@@ -9,7 +9,7 @@
   <arg name="freqMode" default="2"/>
   <arg name="ipAddress" default="auto"/>
 
-  <node name="oculus" pkg="oculus_sonar_ros" type="oculus_driver" output="screen" >
+  <node name="oculus" pkg="oculus_sonar_driver" type="oculus_driver" output="screen" >
     <param name="ipAddress" value="$(arg ipAddress)"/>
     <param name="range" value="$(arg range)"/>
     <param name="pingRate" value="$(arg pingRate)"/>
@@ -17,7 +17,7 @@
     <param name="gainPercent" value="$(arg gainPercent)"/>
     <param name="freqMode" value="$(arg freqMode)"/>
   </node>
-  <!-- <node pkg="oculus_sonar_ros" type="oculus_draw" name="oculus_draw"/> -->
+  <!-- <node pkg="oculus_sonar_driver" type="oculus_draw" name="oculus_draw"/> -->
   <!-- <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/> -->
 
 </launch>
