@@ -1,11 +1,8 @@
 #include "oculus_sonar_driver/OculusDriver.h"
-#include "g3_to_ros_logger/ROSLogSink.h"
-#include "g3_to_ros_logger/g3logger.h"
 
 #include <boost/asio.hpp>
 
 #include <acoustic_msgs/SonarImage.h>
-
 
 namespace oculus_sonar {
 
