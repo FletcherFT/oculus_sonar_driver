@@ -81,7 +81,7 @@ install( DIRECTORY launch/
 install( DIRECTORY rqt_config/
          DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/rqt_config )
 
-install( FILES plugins/nodelet_plugins.xml
+install( FILES nodelet_plugins.xml
   		   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 if (CATKIN_ENABLE_TESTING)
