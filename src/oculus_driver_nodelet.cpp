@@ -39,7 +39,7 @@ void OculusDriver::onInit() {
   // dynamic reconfigure, since dynamic reconfigure will read them from
   // the launch file and immediately publish an update message at launch.
 
-  _sonarClient.reset( new SonarClient( sonarConfig, _ipAddress) );
+  _sonarClient.reset( new SonarClient( _sonarConfig, _ipAddress) );
   _sonarClient->setDataRxCallback( std::bind( &OculusDriver::pingCallback, this, std::placeholders::_1 ) );
   _sonarClient->start();
 
@@ -107,23 +107,23 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
 void OculusDriver::configCallback(oculus_sonar_driver::OculusSonarConfig &config,
 	                          uint32_t level) {
 
-  sonarConfig.postponeCallback();
+  _sonarConfig.postponeCallback();
 
   ROS_INFO_STREAM("Setting sonar range to " << config.range << " m");
-  sonarConfig.setRange(config.range);
+  _sonarConfig.setRange(config.range);
 
   ROS_INFO_STREAM("Setting gain to " << config.gain << " pct");
-  sonarConfig.setGainPercent(config.gain);
+  _sonarConfig.setGainPercent(config.gain);
 
   ROS_INFO_STREAM("Setting gamma to " << config.gamma);
-  sonarConfig.setGamma(config.gamma);
+  _sonarConfig.setGamma(config.gamma);
 
   ROS_INFO_STREAM("Setting ping rate to (" << config.pingRate << "): "
 		  << PingRateToHz(config.pingRate) << " Hz" );
-  sonarConfig.setPingRate( static_cast<PingRateType>(config.pingRate) );
+  _sonarConfig.setPingRate( static_cast<PingRateType>(config.pingRate) );
 
   ROS_INFO_STREAM("Setting freq mode to " << FreqModeToString( config.freqMode) );
-  sonarConfig.setFreqMode( static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode) );
+  _sonarConfig.setFreqMode( static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode) );
 
   // I would prefer to just or some consts together, but didn't see a clean
   // way to do that within dynamic reconfig. Ugly works.
@@ -139,9 +139,9 @@ void OculusDriver::configCallback(oculus_sonar_driver::OculusSonarConfig &config
                   << "\n   send gain       " << config.send_gain
                   << "\n   simple return   " << config.send_simple_return
                   << "\n   gain assistance " << config.gain_assistance);
-  sonarConfig.setFlags(flags);
+  _sonarConfig.setFlags(flags);
 
-  sonarConfig.enableCallback();
+  _sonarConfig.enableCallback();
   // No need for sendCallback() because it is called by enableCallback.
 }
 

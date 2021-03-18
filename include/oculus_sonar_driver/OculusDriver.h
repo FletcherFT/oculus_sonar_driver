@@ -44,7 +44,7 @@ private:
   ros::Publisher _oculusRawPub;
   std::string _ipAddress;
 
-  SonarConfiguration sonarConfig;
+  SonarConfiguration _sonarConfig;
 
   dynamic_reconfigure::Server<oculus_sonar_driver::OculusSonarConfig> _reconfigureServer;
 
