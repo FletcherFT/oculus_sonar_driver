@@ -29,7 +29,7 @@ of the projected sonar data for easy preview (e.g. in `rqt`).
         1. Clone this repo to `<catkin_ws>/src`
         1. `cd <catkin_src>`
         1. `wstool init src src/oculus_sonar_driver/oculus_sonar_driver.rosinstall` (or `wstool merge -t src src/oculus_sonar_driver/oculus_sonar_driver.rosinstall` if you're already using wstool )
-     1. Or install dependencies manually. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [active_object](https://gitlab.com/apl-ocean-engineering/hmi-lsd-slam-transition/active_object), [imaging_sonar_msgs](https://gitlab.com/apl-ocean-engineering/imaging_sonar_msgs), and [g3log_catkin](https://gitlab.com/apl-ocean-engineering/lsd-slam/g3log_catkin) to ``<catkin_ws>/src`
+     1. Or install dependencies manually. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [imaging_sonar_msgs](https://gitlab.com/apl-ocean-engineering/imaging_sonar_msgs), and [g3log_catkin](https://gitlab.com/apl-ocean-engineering/lsd-slam/g3log_catkin) to ``<catkin_ws>/src`
   1. Run `catkin_make` or `catkin build` from ``<catkin_ws>``
   1. Run `source ./devel/setup.bash` from ``<catkin_ws>``
 
