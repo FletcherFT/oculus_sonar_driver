@@ -25,12 +25,21 @@ void OculusDriver::onInit() {
   ros::NodeHandle pn_(getMTPrivateNodeHandle());
 
   NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace() );
+  NODELET_INFO_STREAM("Private namespace would be:" << pn_.getNamespace() );
 
-  _imagingSonarPub = n_.advertise<acoustic_msgs::SonarImage>( "sonar_image", 100);
-  _oculusRawPub = n_.advertise<oculus_sonar_driver::OculusSonarRawMsg>( "oculus_raw", 100);
+  _imagingSonarPub = n_.advertise<acoustic_msgs::SonarImage>("sonar_image", 100);
+  _oculusRawPub = n_.advertise<oculus_sonar_driver::OculusSonarRawMsg>("oculus_raw", 100);
 
-  pn_.param<string>("ipAddress", _ipAddress, "auto");
-  NODELET_INFO_STREAM("Opening sonar at " << _ipAddress );
+  // NB: Params set in the launch file go to /raven/oculus's namespace,
+  //     rather than /raven/oculus/driver. For normal nodes, should definitely
+  //     use the private namespace, but I'm not sure how to do that when
+  //     nodelets have been compiled into the executable, rather than
+  //     configured in a launch file.
+  n_.param<std::string>("ipAddress", _ipAddress, "auto");
+  NODELET_INFO_STREAM("Opening sonar at " << _ipAddress);
+
+  n_.param<std::string>("frameId", _frameId, "");
+  NODELET_INFO_STREAM("Publishing data with frame = " << _frameId);
 
   // It is not necessary to load any of the parameters controlled by
   // dynamic reconfigure, since dynamic reconfigure will read them from
@@ -48,9 +57,11 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
   // TODO: It might make sense to have a generic "raw data" message type,
   //       used for all relevant hardware.
   oculus_sonar_driver::OculusSonarRawMsg raw_msg;
-
+  // NOTE(lindzey): I don't think we're supposed to use seq this way, but
+  //     I also don't know that it breaks anything.
   raw_msg.header.seq = ping.oculusPing()->pingId;
   raw_msg.header.stamp = ros::Time::now();
+  raw_msg.header.frame_id = _frameId;
   auto rawSize = ping.size();
   raw_msg.data.resize( rawSize );
   memcpy( raw_msg.data.data(), ping.ptr(), rawSize );
@@ -60,6 +71,7 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
   acoustic_msgs::SonarImage sonar_msg;
   sonar_msg.header.seq = ping.oculusPing()->pingId;
   sonar_msg.header.stamp = raw_msg.header.stamp;
+  sonar_msg.header.frame_id = _frameId;
   sonar_msg.frequency = ping.oculusPing()->frequency;
 
   // \todo This is actually frequency dependent

@@ -5,7 +5,7 @@
 #include "std_msgs/String.h"
 #include <cstdlib>
 #include <sstream>
-using std::string;
+#include <string>
 
 #include <memory>
 
@@ -43,6 +43,7 @@ private:
   ros::Publisher _imagingSonarPub;
   ros::Publisher _oculusRawPub;
   std::string _ipAddress;
+  std::string _frameId;
 
   SonarConfiguration _sonarConfig;
 
