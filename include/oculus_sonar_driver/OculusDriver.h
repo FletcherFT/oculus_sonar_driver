@@ -38,16 +38,16 @@ private:
 
   void onInit() override;
 
-  std::unique_ptr< SonarClient > _sonarClient;
+  std::unique_ptr< SonarClient > sonar_client_;
 
-  ros::Publisher _imagingSonarPub;
-  ros::Publisher _oculusRawPub;
-  std::string _ipAddress;
-  std::string _frameId;
+  ros::Publisher imaging_sonar_pub_;
+  ros::Publisher oculus_raw_pub_;
+  std::string ip_address_;
+  std::string frame_id_;
 
-  SonarConfiguration _sonarConfig;
+  SonarConfiguration sonar_config_;
 
-  dynamic_reconfigure::Server<oculus_sonar_driver::OculusSonarConfig> _reconfigureServer;
+  dynamic_reconfigure::Server<oculus_sonar_driver::OculusSonarConfig> reconfigure_server_;
 
 };
 

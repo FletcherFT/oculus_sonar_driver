@@ -8,18 +8,18 @@ namespace oculus_sonar {
 
 OculusDriver::OculusDriver()
   : Nodelet(),
-    _sonarClient(),
-    _reconfigureServer()
+    sonar_client_(),
+    reconfigure_server_()
  {;}
 
 OculusDriver::~OculusDriver() {
-    _sonarClient->stop();
-    _sonarClient->join();
+    sonar_client_->stop();
+    sonar_client_->join();
 }
 
 void OculusDriver::onInit() {
 
-  _reconfigureServer.setCallback( boost::bind(&OculusDriver::configCallback, this, _1, _2) );
+  reconfigure_server_.setCallback(boost::bind(&OculusDriver::configCallback, this, _1, _2));
 
   ros::NodeHandle n_(getMTNodeHandle());
   ros::NodeHandle pn_(getMTPrivateNodeHandle());
@@ -27,27 +27,27 @@ void OculusDriver::onInit() {
   NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace() );
   NODELET_INFO_STREAM("Private namespace would be:" << pn_.getNamespace() );
 
-  _imagingSonarPub = n_.advertise<acoustic_msgs::SonarImage>("sonar_image", 100);
-  _oculusRawPub = n_.advertise<oculus_sonar_driver::OculusSonarRawMsg>("oculus_raw", 100);
+  imaging_sonar_pub_ = n_.advertise<acoustic_msgs::SonarImage>("sonar_image", 100);
+  oculus_raw_pub_ = n_.advertise<oculus_sonar_driver::OculusSonarRawMsg>("oculus_raw", 100);
 
   // NB: Params set in the launch file go to /raven/oculus's namespace,
   //     rather than /raven/oculus/driver. For normal nodes, should definitely
   //     use the private namespace, but I'm not sure how to do that when
   //     nodelets have been compiled into the executable, rather than
   //     configured in a launch file.
-  n_.param<std::string>("ipAddress", _ipAddress, "auto");
-  NODELET_INFO_STREAM("Opening sonar at " << _ipAddress);
+  n_.param<std::string>("ipAddress", ip_address_, "auto");
+  NODELET_INFO_STREAM("Opening sonar at " << ip_address_);
 
-  n_.param<std::string>("frameId", _frameId, "");
-  NODELET_INFO_STREAM("Publishing data with frame = " << _frameId);
+  n_.param<std::string>("frameId", frame_id_, "");
+  NODELET_INFO_STREAM("Publishing data with frame = " << frame_id_);
 
   // It is not necessary to load any of the parameters controlled by
   // dynamic reconfigure, since dynamic reconfigure will read them from
   // the launch file and immediately publish an update message at launch.
 
-  _sonarClient.reset( new SonarClient( _sonarConfig, _ipAddress) );
-  _sonarClient->setDataRxCallback( std::bind( &OculusDriver::pingCallback, this, std::placeholders::_1 ) );
-  _sonarClient->start();
+  sonar_client_.reset(new SonarClient(sonar_config_, ip_address_));
+  sonar_client_->setDataRxCallback(std::bind(&OculusDriver::pingCallback, this, std::placeholders::_1));
+  sonar_client_->start();
 
 }
 
@@ -61,17 +61,17 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
   //     I also don't know that it breaks anything.
   raw_msg.header.seq = ping.oculusPing()->pingId;
   raw_msg.header.stamp = ros::Time::now();
-  raw_msg.header.frame_id = _frameId;
-  auto rawSize = ping.size();
-  raw_msg.data.resize( rawSize );
-  memcpy( raw_msg.data.data(), ping.ptr(), rawSize );
-  _oculusRawPub.publish( raw_msg );
+  raw_msg.header.frame_id = frame_id_;
+  auto raw_size = ping.size();
+  raw_msg.data.resize(raw_size);
+  memcpy(raw_msg.data.data(), ping.ptr(), raw_size);
+  oculus_raw_pub_.publish(raw_msg);
 
   // Publish message parsed into the image format
   acoustic_msgs::SonarImage sonar_msg;
   sonar_msg.header.seq = ping.oculusPing()->pingId;
   sonar_msg.header.stamp = raw_msg.header.stamp;
-  sonar_msg.header.frame_id = _frameId;
+  sonar_msg.header.frame_id = frame_id_;
   sonar_msg.frequency = ping.oculusPing()->frequency;
 
   // \todo This is actually frequency dependent
@@ -88,27 +88,27 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
     return;
   }
 
-  const int nBearings = ping.oculusPing()->nBeams;
-  const int nRanges = ping.oculusPing()->nRanges;
+  const int num_bearings = ping.oculusPing()->nBeams;
+  const int num_ranges = ping.oculusPing()->nRanges;
 
-  for( unsigned int b = 0; b < nBearings; b++ ) {
-    sonar_msg.azimuth_angles.push_back( ping.bearings().at( b ) * M_PI/180 );
+  for(unsigned int b = 0; b < num_bearings; b++) {
+    sonar_msg.azimuth_angles.push_back(ping.bearings().at(b) * M_PI/180);
   }
 
-  for( unsigned int i = 0; i < nRanges; i++ ) {
-    sonar_msg.ranges.push_back( float(i+0.5) * ping.oculusPing()->rangeResolution );
+  for(unsigned int i = 0; i < num_ranges; i++) {
+    sonar_msg.ranges.push_back(float(i+0.5) * ping.oculusPing()->rangeResolution);
   }
 
   // Bytes for right now
   sonar_msg.is_bigendian = false;
   sonar_msg.data_size = 1;
 
-  for( unsigned int r = 0; r < nRanges; r++ ) {
-    for( unsigned int b = 0; b < nBearings; b++ ) {
-      sonar_msg.intensities.push_back( ping.image().at(b,r) );
+  for(unsigned int r = 0; r < num_ranges; r++) {
+    for(unsigned int b = 0; b < num_bearings; b++) {
+      sonar_msg.intensities.push_back(ping.image().at(b,r));
     }
   }
-  _imagingSonarPub.publish(sonar_msg);
+  imaging_sonar_pub_.publish(sonar_msg);
 
 }
 
@@ -116,23 +116,23 @@ void OculusDriver::pingCallback(const SimplePingResult &ping) {
 void OculusDriver::configCallback(oculus_sonar_driver::OculusSonarConfig &config,
 	                          uint32_t level) {
 
-  _sonarConfig.postponeCallback();
+  sonar_config_.postponeCallback();
 
   ROS_INFO_STREAM("Setting sonar range to " << config.range << " m");
-  _sonarConfig.setRange(config.range);
+  sonar_config_.setRange(config.range);
 
   ROS_INFO_STREAM("Setting gain to " << config.gain << " pct");
-  _sonarConfig.setGainPercent(config.gain);
+  sonar_config_.setGainPercent(config.gain);
 
   ROS_INFO_STREAM("Setting gamma to " << config.gamma);
-  _sonarConfig.setGamma(config.gamma);
+  sonar_config_.setGamma(config.gamma);
 
   ROS_INFO_STREAM("Setting ping rate to (" << config.pingRate << "): "
-		  << PingRateToHz(config.pingRate) << " Hz" );
-  _sonarConfig.setPingRate( static_cast<PingRateType>(config.pingRate) );
+		  << PingRateToHz(config.pingRate) << " Hz");
+  sonar_config_.setPingRate(static_cast<PingRateType>(config.pingRate));
 
-  ROS_INFO_STREAM("Setting freq mode to " << FreqModeToString( config.freqMode) );
-  _sonarConfig.setFreqMode( static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode) );
+  ROS_INFO_STREAM("Setting freq mode to " << FreqModeToString(config.freqMode));
+  sonar_config_.setFreqMode( static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode));
 
   // I would prefer to just or some consts together, but didn't see a clean
   // way to do that within dynamic reconfig. Ugly works.
@@ -148,9 +148,9 @@ void OculusDriver::configCallback(oculus_sonar_driver::OculusSonarConfig &config
                   << "\n   send gain       " << config.send_gain
                   << "\n   simple return   " << config.send_simple_return
                   << "\n   gain assistance " << config.gain_assistance);
-  _sonarConfig.setFlags(flags);
+  sonar_config_.setFlags(flags);
 
-  _sonarConfig.enableCallback();
+  sonar_config_.enableCallback();
   // No need for sendCallback() because it is called by enableCallback.
 }
 
