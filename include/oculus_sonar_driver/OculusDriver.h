@@ -1,3 +1,6 @@
+// Copyright 2020 UW-APL
+// Authors: Aaron Marburg, Laura Lindzey
+
 #pragma once
 
 #include "ros/ros.h"
@@ -23,32 +26,31 @@
 
 namespace oculus_sonar {
 
-using namespace liboculus;
-
 class OculusDriver : public nodelet::Nodelet {
-public:
-
+ public:
   OculusDriver();
   virtual ~OculusDriver();
 
-  void pingCallback(const SimplePingResult &ping);
-  void configCallback(oculus_sonar_driver::OculusSonarConfig &config, uint32_t level);
+  // Translate SimplePingResult to SonarImage and publish
+  void pingCallback(const liboculus::SimplePingResult &ping);
+  // Update configuration based on command from dynamic_reconfigure
+  void configCallback(const oculus_sonar_driver::OculusSonarConfig &config,
+                      uint32_t level);
 
-private:
-
+ private:
+  // Set up all ROS interfaces and start the sonarClient
   void onInit() override;
 
-  std::unique_ptr< SonarClient > sonar_client_;
+  std::unique_ptr< liboculus::SonarClient > sonar_client_;
 
   ros::Publisher imaging_sonar_pub_;
   ros::Publisher oculus_raw_pub_;
   std::string ip_address_;
   std::string frame_id_;
 
-  SonarConfiguration sonar_config_;
+  liboculus::SonarConfiguration sonar_config_;
 
   dynamic_reconfigure::Server<oculus_sonar_driver::OculusSonarConfig> reconfigure_server_;
-
 };
 
-}
+}  // namespace oculus_sonar
