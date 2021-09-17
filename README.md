@@ -18,18 +18,18 @@ over ethernet and publishes `acoustic_msgs::SonarImage` and
 The package also builds a conventional node `oculus_driver` which runs the
 `oculus_sonar/driver` nodelet and an instance of the `draw_sonar` nodelet from
 [sonar_image_proc](https://github.com/apl-ocean-engineering/sonar_image_proc).
-It subscribes to `acoustic_msgs::SonarImage` and produces a `sensor_msgs/Image` 
+It subscribes to `acoustic_msgs::SonarImage` and produces a `sensor_msgs/Image`
 of the projected sonar data for easy preview (e.g. in `rqt`).
 
 
 ## Installation
 
   1. Either:
-     1. Use [wstool](http://wiki.ros.org/wstool):
+     1. Use [vcstool](http://wiki.ros.org/vcstool):
         1. Clone this repo to `<catkin_ws>/src`
         1. `cd <catkin_src>`
-        1. `wstool init src src/oculus_sonar_driver/oculus_sonar_driver.rosinstall` (or `wstool merge -t src src/oculus_sonar_driver/oculus_sonar_driver.rosinstall` if you're already using wstool )
-     1. Or install dependencies manually. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [imaging_sonar_msgs](https://gitlab.com/apl-ocean-engineering/imaging_sonar_msgs), and [g3log_catkin](https://gitlab.com/apl-ocean-engineering/lsd-slam/g3log_catkin) to ``<catkin_ws>/src`
+        1. `vcs import --input oculus_sonar_driver/oculus_sonar_driver.repos`
+     1. Or install dependencies manually. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [hydrographic_msgs](https://github.com/apl-ocean-engineering/hydrographic_msgs.git) and [g3log_catkin](https://gitlab.com/apl-ocean-engineering/g3log_catkin) to ``<catkin_ws>/src`
   1. Run `catkin_make` or `catkin build` from ``<catkin_ws>``
   1. Run `source ./devel/setup.bash` from ``<catkin_ws>``
 
