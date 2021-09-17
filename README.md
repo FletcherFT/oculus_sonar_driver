@@ -29,7 +29,7 @@ of the projected sonar data for easy preview (e.g. in `rqt`).
         1. Clone this repo to `<catkin_ws>/src`
         1. `cd <catkin_src>`
         1. `vcs import --input oculus_sonar_driver/oculus_sonar_driver.repos`
-     1. Or install dependencies manually. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [hydrographic_msgs](https://github.com/apl-ocean-engineering/hydrographic_msgs.git) and [g3log_catkin](https://gitlab.com/apl-ocean-engineering/g3log_catkin) to ``<catkin_ws>/src`
+     1. Or install dependencies manually. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [hydrographic_msgs](https://github.com/apl-ocean-engineering/hydrographic_msgs.git) and [g3log_catkin](https://gitlab.com/apl-ocean-engineering/g3log_catkin) to `<catkin_ws>/src`
   1. Run `catkin_make` or `catkin build` from ``<catkin_ws>``
   1. Run `source ./devel/setup.bash` from ``<catkin_ws>``
 
