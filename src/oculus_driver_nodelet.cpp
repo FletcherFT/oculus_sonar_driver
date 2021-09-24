@@ -95,6 +95,7 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   const int num_bearings = ping.oculusPing()->nBeams;
   const int num_ranges = ping.oculusPing()->nRanges;
 
+  // QUESTION(lindzey): it looks like bearings is commented out of the OculusSimplePingResult...
   for (unsigned int b = 0; b < num_bearings; b++) {
     sonar_msg.azimuth_angles.push_back(ping.bearings().at(b) * M_PI/180);
   }
@@ -146,16 +147,17 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
   if (config.send_gain)          flags += 4;
   if (config.send_simple_return) flags += 8;
   if (config.gain_assistance)    flags += 16;
-  ROS_INFO_STREAM("Setting flags: "
+  if (config.all_beams)          flags += 64;  // 0x40
+  ROS_INFO_STREAM("Setting flags: " << 1.0 * flags
                   << "\n   range is meters " << config.range_as_meters
                   << "\n   data is 16 bit  " << config.data_16bit
                   << "\n   send gain       " << config.send_gain
                   << "\n   simple return   " << config.send_simple_return
-                  << "\n   gain assistance " << config.gain_assistance);
+                  << "\n   gain assistance " << config.gain_assistance
+                  << "\n   use 512 beams   " << config.all_beams);
   sonar_config_.setFlags(flags);
 
   sonar_config_.enableCallback();
-  // No need for sendCallback() because it is called by enableCallback.
 };
 
 }  // namespace oculus_sonar
