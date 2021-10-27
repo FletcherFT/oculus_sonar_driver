@@ -19,7 +19,7 @@
   <depend>acoustic_msgs</depend>
   <depend>cv_bridge</depend>
   <depend>sonar_image_proc</depend>
-  <depend>g3log_catkin</depend>
+  <depend>g3log_ros</depend>
   <depend>image_transport</depend>
   <depend>liboculus</depend>
   <depend>nodelet</depend>

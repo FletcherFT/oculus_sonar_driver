@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   sonar_image_proc
   dynamic_reconfigure
-  g3log_catkin
+  g3log_ros
   image_transport
   liboculus REQUIRED
   message_generation
@@ -45,7 +45,7 @@ add_compile_options(-std=c++14)
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS liboculus g3log_catkin image_transport
+  CATKIN_DEPENDS liboculus g3log_ros image_transport
 )
 
 include_directories(
