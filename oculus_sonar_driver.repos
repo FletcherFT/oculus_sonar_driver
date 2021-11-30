@@ -1,4 +1,0 @@
-- git: {local-name: hydrographic_msgs, uri: "git@github.com:apl-ocean-engineering/hydrographic_msgs.git", version: main}
-- git: {local-name: g3log_ros, uri: "git@gitlab.com:apl-ocean-engineering/g3log_ros.git", version: main}
-- git: {local-name: liboculus, uri: "git@github.com:apl-ocean-engineering/liboculus.git", version: main}
-- git: {local-name: sonar_image_proc, uri: "git@github.com:apl-ocean-engineering/sonar_image_proc.git", version: main}
