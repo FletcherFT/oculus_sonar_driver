@@ -14,7 +14,7 @@ steps:
     - wget -O- https://gitlab.com/amarburg/ros_drone_ci/-/raw/master/bootstrap.sh | /bin/bash
   environment:
     ROS_PACKAGES_TO_INSTALL: cv-bridge image-transport
-    WSTOOL_RECURSIVE: true
+    VCS_RECURSIVE: true
 
 - name: build-noetic
   image: amarburg/drone-ci-ros-noetic:latest
@@ -22,7 +22,7 @@ steps:
     - wget -O- https://gitlab.com/amarburg/ros_drone_ci/-/raw/master/bootstrap.sh | /bin/bash
   environment:
     ROS_PACKAGES_TO_INSTALL: cv-bridge image-transport
-    WSTOOL_RECURSIVE: true
+    VCS_RECURSIVE: true
 
 - name: slack
   image: plugins/slack
