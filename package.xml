@@ -16,6 +16,7 @@
 
   <exec_depend>roscpp</exec_depend>
 
+  <depend>apl_msgs</depend>
   <depend>acoustic_msgs</depend>
   <depend>cv_bridge</depend>
   <depend>sonar_image_proc</depend>

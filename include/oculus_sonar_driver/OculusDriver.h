@@ -21,10 +21,9 @@
 #include <dynamic_reconfigure/server.h>
 
 // Auto-generated files
-#include "oculus_sonar_driver/OculusSonarRawMsg.h"
 #include "oculus_sonar_driver/OculusSonarConfig.h"
 
-namespace oculus_sonar {
+namespace oculus_sonar_driver {
 
 class OculusDriver : public nodelet::Nodelet {
  public:
@@ -33,6 +32,7 @@ class OculusDriver : public nodelet::Nodelet {
 
   // Translate SimplePingResult to SonarImage and publish
   void pingCallback(const liboculus::SimplePingResult &ping);
+  
   // Update configuration based on command from dynamic_reconfigure
   void configCallback(const oculus_sonar_driver::OculusSonarConfig &config,
                       uint32_t level);
@@ -44,7 +44,7 @@ class OculusDriver : public nodelet::Nodelet {
   std::unique_ptr< liboculus::SonarClient > sonar_client_;
 
   ros::Publisher imaging_sonar_pub_;
-  ros::Publisher oculus_raw_pub_;
+  ros::Publisher raw_data_pub_;
   std::string ip_address_;
   std::string frame_id_;
 

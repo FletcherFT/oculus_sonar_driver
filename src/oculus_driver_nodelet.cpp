@@ -7,8 +7,9 @@
 #include <boost/asio.hpp>
 
 #include <acoustic_msgs/SonarImage.h>
+#include <apl_msgs/RawData.h>
 
-namespace oculus_sonar {
+namespace oculus_sonar_driver {
 
 OculusDriver::OculusDriver()
   : Nodelet(),
@@ -32,7 +33,7 @@ void OculusDriver::onInit() {
   NODELET_INFO_STREAM("Private namespace would be:" << pn_.getNamespace());
 
   imaging_sonar_pub_ = n_.advertise<acoustic_msgs::SonarImage>("sonar_image", 100);
-  oculus_raw_pub_ = n_.advertise<oculus_sonar_driver::OculusSonarRawMsg>("oculus_raw", 100);
+  raw_data_pub_ = n_.advertise<apl_msgs::RawData>("raw_data", 100);
 
   // NB: Params set in the launch file go to /raven/oculus's namespace,
   //     rather than /raven/oculus/driver. For normal nodes, should definitely
@@ -49,27 +50,33 @@ void OculusDriver::onInit() {
   // dynamic reconfigure, since dynamic reconfigure will read them from
   // the launch file and immediately publish an update message at launch.
 
-  sonar_client_.reset(new liboculus::SonarClient(sonar_config_, ip_address_));
-  sonar_client_->setDataRxCallback(std::bind(&OculusDriver::pingCallback,
+  sonar_client_.reset(new liboculus::SonarClient(ip_address_));
+  sonar_client_->setCallback(std::bind(&OculusDriver::pingCallback,
                                              this, std::placeholders::_1));
+
+  // When the node connects, start the sonar pinging by sending
+  // a OculusSimpleFireMessage current configuration.
+  sonar_client_->setOnConnectCallback( [&]() {
+    sonar_client_->sendConfiguration(sonar_config_);
+  });
+
   sonar_client_->start();
 }
 
 
 // Processes and publishes sonar pings to a ROS topic
 void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
-  // TODO(lindzey): It might make sense to have a generic "raw data"
-  //       message type, used for all relevant hardware.
-  oculus_sonar_driver::OculusSonarRawMsg raw_msg;
+  apl_msgs::RawData raw_msg;
   // NOTE(lindzey): I don't think we're supposed to use seq this way, but
   //     I also don't know that it breaks anything.
   raw_msg.header.seq = ping.oculusPing()->pingId;
   raw_msg.header.stamp = ros::Time::now();
   raw_msg.header.frame_id = frame_id_;
+  raw_msg.direction = apl_msgs::RawData::DATA_IN;
   auto raw_size = ping.size();
   raw_msg.data.resize(raw_size);
   memcpy(raw_msg.data.data(), ping.ptr(), raw_size);
-  oculus_raw_pub_.publish(raw_msg);
+  raw_data_pub_.publish(raw_msg);
 
   // Publish message parsed into the image format
   acoustic_msgs::SonarImage sonar_msg;
@@ -96,6 +103,10 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   const int num_ranges = ping.oculusPing()->nRanges;
 
   // QUESTION(lindzey): it looks like bearings is commented out of the OculusSimplePingResult...
+  // ANSWER(aaron): It's not commented out, the "bearing[]" is a ghost
+  // indicating "there's a variable length array of shorts here but we're
+  // not going to actually assign it a variable in the struct"
+  // This is then followed by the block of sonar data...
   for (unsigned int b = 0; b < num_bearings; b++) {
     sonar_msg.azimuth_angles.push_back(ping.bearings().at(b) * M_PI/180);
   }
@@ -121,8 +132,6 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
 // Updates sonar parameters
 void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &config,
                                   uint32_t level) {
-  sonar_config_.postponeCallback();
-
   ROS_INFO_STREAM("Setting sonar range to " << config.range << " m");
   sonar_config_.setRange(config.range);
 
@@ -157,10 +166,11 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
                   << "\n   use 512 beams   " << config.all_beams);
   sonar_config_.setFlags(flags);
 
-  sonar_config_.enableCallback();
+  // Update the sonar with new params
+  sonar_client_->sendConfiguration(sonar_config_);
 };
 
-}  // namespace oculus_sonar
+}  // namespace oculus_sonar_driver
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(oculus_sonar::OculusDriver, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(oculus_sonar_driver::OculusDriver, nodelet::Nodelet);

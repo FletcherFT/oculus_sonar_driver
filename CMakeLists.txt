@@ -26,10 +26,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## Build messages
-add_message_files(
-  FILES
-  OculusSonarRawMsg.msg
-)
+# add_message_files(
+#   FILES
+# )
 
 generate_messages(DEPENDENCIES std_msgs sensor_msgs)
 
