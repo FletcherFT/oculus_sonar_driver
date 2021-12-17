@@ -13,13 +13,15 @@ namespace oculus_sonar_driver {
 
 OculusDriver::OculusDriver()
   : Nodelet(),
-    sonar_client_(),
+    ioSrv_(std::make_shared<liboculus::IoServiceThread>()),
+    data_rx_(ioSrv_),
+    status_rx_(ioSrv_),
     reconfigure_server_()
 {;}
 
 OculusDriver::~OculusDriver() {
-    sonar_client_->stop();
-    sonar_client_->join();
+    ioSrv_->stop();
+    ioSrv_->join();
 }
 
 void OculusDriver::onInit() {
@@ -50,17 +52,25 @@ void OculusDriver::onInit() {
   // dynamic reconfigure, since dynamic reconfigure will read them from
   // the launch file and immediately publish an update message at launch.
 
-  sonar_client_.reset(new liboculus::SonarClient(ip_address_));
-  sonar_client_->setCallback(std::bind(&OculusDriver::pingCallback,
+  if (ip_address_ == "auto") {
+    status_rx_.setCallback( [&](const liboculus::SonarStatus &status, bool is_valid) {
+      if (!is_valid || data_rx_.isConnected()) return;
+      data_rx_.connect(status.ipAddr());
+    });
+  } else {
+    data_rx_.connect(ip_address_);
+  }
+
+  data_rx_.setSimplePingCallback(std::bind(&OculusDriver::pingCallback,
                                              this, std::placeholders::_1));
 
   // When the node connects, start the sonar pinging by sending
   // a OculusSimpleFireMessage current configuration.
-  sonar_client_->setOnConnectCallback( [&]() {
-    sonar_client_->sendConfiguration(sonar_config_);
+  data_rx_.setOnConnectCallback( [&]() {
+    data_rx_.sendSimpleFireMessage(sonar_config_);
   });
 
-  sonar_client_->start();
+  ioSrv_->start();
 }
 
 
@@ -167,7 +177,7 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
   sonar_config_.setFlags(flags);
 
   // Update the sonar with new params
-  sonar_client_->sendConfiguration(sonar_config_);
+  data_rx_.sendSimpleFireMessage(sonar_config_);
 };
 
 }  // namespace oculus_sonar_driver
