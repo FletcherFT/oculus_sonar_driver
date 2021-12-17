@@ -43,9 +43,9 @@ class OculusDriver : public nodelet::Nodelet {
   // Set up all ROS interfaces and start the sonarClient
   void onInit() override;
 
-  std::shared_ptr<liboculus::IoServiceThread> ioSrv_;
+  liboculus::IoServiceThread io_srv_;
   liboculus::DataRx data_rx_;
-  liboculus::StatusRx status_rx_;
+  //liboculus::StatusRx status_rx_;
 
   ros::Publisher imaging_sonar_pub_;
   ros::Publisher raw_data_pub_;

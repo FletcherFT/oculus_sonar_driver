@@ -7,8 +7,9 @@
   <arg name="gamma" default="127"/>
   <arg name="pingRate" default="0"/>
   <arg name="freqMode" default="2"/>
-  <arg name="ipAddress" default="auto"/>
+  <arg name="ipAddress" default="10.10.10.133"/>
 
+  <!--  launch-prefix="gdb -ex run args" -->
   <node name="oculus" pkg="oculus_sonar_driver" type="oculus_driver" output="screen" >
     <param name="ipAddress" value="$(arg ipAddress)"/>
     <param name="range" value="$(arg range)"/>

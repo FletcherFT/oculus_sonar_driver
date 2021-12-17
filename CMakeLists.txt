@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  apl_msgs
 )
 
 ## Build messages
@@ -30,7 +31,7 @@ find_package(catkin REQUIRED COMPONENTS
 #   FILES
 # )
 
-generate_messages(DEPENDENCIES std_msgs sensor_msgs)
+#generate_messages(DEPENDENCIES std_msgs sensor_msgs)
 
 
 #add dynamic reconfigure api
@@ -38,7 +39,7 @@ generate_dynamic_reconfigure_options(
   cfg/OculusSonar.cfg
 )
 
-## Compile as C++11, supported in ROS Kinetic and newer
+## Compile as C++14, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
 
 

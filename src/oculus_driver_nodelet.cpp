@@ -1,27 +1,26 @@
 // Copyright 2020 UW-APL
 // Authors: Aaron Marburg, Laura Lindzey
 
-
-#include "oculus_sonar_driver/OculusDriver.h"
-
 #include <boost/asio.hpp>
 
 #include <acoustic_msgs/SonarImage.h>
 #include <apl_msgs/RawData.h>
 
+#include "oculus_sonar_driver/OculusDriver.h"
+
 namespace oculus_sonar_driver {
 
 OculusDriver::OculusDriver()
   : Nodelet(),
-    ioSrv_(std::make_shared<liboculus::IoServiceThread>()),
-    data_rx_(ioSrv_),
-    status_rx_(ioSrv_),
+    io_srv_(),
+    data_rx_(io_srv_.context()),
+    //status_rx_(io_srv_.context()),
     reconfigure_server_()
 {;}
 
 OculusDriver::~OculusDriver() {
-    ioSrv_->stop();
-    ioSrv_->join();
+  io_srv_.stop();
+  io_srv_.join();
 }
 
 void OculusDriver::onInit() {
@@ -43,23 +42,9 @@ void OculusDriver::onInit() {
   //     nodelets have been compiled into the executable, rather than
   //     configured in a launch file.
   n_.param<std::string>("ipAddress", ip_address_, "auto");
-  NODELET_INFO_STREAM("Opening sonar at " << ip_address_);
 
   n_.param<std::string>("frameId", frame_id_, "");
   NODELET_INFO_STREAM("Publishing data with frame = " << frame_id_);
-
-  // It is not necessary to load any of the parameters controlled by
-  // dynamic reconfigure, since dynamic reconfigure will read them from
-  // the launch file and immediately publish an update message at launch.
-
-  if (ip_address_ == "auto") {
-    status_rx_.setCallback( [&](const liboculus::SonarStatus &status, bool is_valid) {
-      if (!is_valid || data_rx_.isConnected()) return;
-      data_rx_.connect(status.ipAddr());
-    });
-  } else {
-    data_rx_.connect(ip_address_);
-  }
 
   data_rx_.setSimplePingCallback(std::bind(&OculusDriver::pingCallback,
                                              this, std::placeholders::_1));
@@ -70,12 +55,30 @@ void OculusDriver::onInit() {
     data_rx_.sendSimpleFireMessage(sonar_config_);
   });
 
-  ioSrv_->start();
+  // It is not necessary to load any of the parameters controlled by
+  // dynamic reconfigure, since dynamic reconfigure will read them from
+  // the launch file and immediately publish an update message at launch.
+
+  if (ip_address_ == "auto") {
+    NODELET_INFO_STREAM("Attempting to auto-detect sonar");
+    // status_rx_.setCallback( [&](const liboculus::SonarStatus &status, bool is_valid) {
+    //   if (!is_valid || data_rx_.isConnected()) return;
+    //   data_rx_.connect(status.ipAddr());
+    // });
+  } else {
+    NODELET_INFO_STREAM("Opening sonar at " << ip_address_);
+    data_rx_.connect(ip_address_);
+  }
+
+  io_srv_.start();
+
 }
 
 
 // Processes and publishes sonar pings to a ROS topic
 void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
+  NODELET_INFO_STREAM("In ping callback");
+
   apl_msgs::RawData raw_msg;
   // NOTE(lindzey): I don't think we're supposed to use seq this way, but
   //     I also don't know that it breaks anything.
@@ -177,7 +180,9 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
   sonar_config_.setFlags(flags);
 
   // Update the sonar with new params
-  data_rx_.sendSimpleFireMessage(sonar_config_);
+  if (data_rx_.isConnected()) {
+    data_rx_.sendSimpleFireMessage(sonar_config_);
+  }
 };
 
 }  // namespace oculus_sonar_driver
