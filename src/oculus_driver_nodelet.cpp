@@ -82,21 +82,21 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   apl_msgs::RawData raw_msg;
   // NOTE(lindzey): I don't think we're supposed to use seq this way, but
   //     I also don't know that it breaks anything.
-  raw_msg.header.seq = ping.oculusPing()->pingId;
+  raw_msg.header.seq = ping.ping()->pingId;
   raw_msg.header.stamp = ros::Time::now();
   raw_msg.header.frame_id = frame_id_;
   raw_msg.direction = apl_msgs::RawData::DATA_IN;
-  auto raw_size = ping.size();
+  auto raw_size = ping.buffer().size();
   raw_msg.data.resize(raw_size);
-  memcpy(raw_msg.data.data(), ping.ptr(), raw_size);
+  memcpy(raw_msg.data.data(), ping.buffer().data(), raw_size);
   raw_data_pub_.publish(raw_msg);
 
   // Publish message parsed into the image format
   acoustic_msgs::SonarImage sonar_msg;
-  sonar_msg.header.seq = ping.oculusPing()->pingId;
+  sonar_msg.header.seq = ping.ping()->pingId;
   sonar_msg.header.stamp = raw_msg.header.stamp;
   sonar_msg.header.frame_id = frame_id_;
-  sonar_msg.frequency = ping.oculusPing()->frequency;
+  sonar_msg.frequency = ping.ping()->frequency;
 
   // \todo This is actually frequency dependent
   if (sonar_msg.frequency > 2000000) {
@@ -112,8 +112,8 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
     return;
   }
 
-  const int num_bearings = ping.oculusPing()->nBeams;
-  const int num_ranges = ping.oculusPing()->nRanges;
+  const int num_bearings = ping.ping()->nBeams;
+  const int num_ranges = ping.ping()->nRanges;
 
   // QUESTION(lindzey): it looks like bearings is commented out of the OculusSimplePingResult...
   // ANSWER(aaron): It's not commented out, the "bearing[]" is a ghost
@@ -127,7 +127,7 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   // QUESTION(lindzey): Is this actually right?
   //    Do their ranges start at 0, or at the min range of 10 cm?
   for (unsigned int i = 0; i < num_ranges; i++) {
-    sonar_msg.ranges.push_back(float(i+0.5) * ping.oculusPing()->rangeResolution);
+    sonar_msg.ranges.push_back(float(i+0.5) * ping.ping()->rangeResolution);
   }
 
   // Only handle single-byte data for right now
