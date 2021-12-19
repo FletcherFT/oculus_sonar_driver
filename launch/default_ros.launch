@@ -10,7 +10,7 @@
   <arg name="ipAddress" default="10.10.10.133"/>
 
   <!--  launch-prefix="gdb -ex run args" -->
-  <node name="oculus" pkg="oculus_sonar_driver" type="oculus_driver" output="screen" >
+  <node name="oculus" pkg="oculus_sonar_driver" type="oculus_driver" output="screen">
     <param name="ipAddress" value="$(arg ipAddress)"/>
     <param name="range" value="$(arg range)"/>
     <param name="pingRate" value="$(arg pingRate)"/>

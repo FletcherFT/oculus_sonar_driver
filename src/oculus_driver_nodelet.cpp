@@ -14,7 +14,7 @@ OculusDriver::OculusDriver()
   : Nodelet(),
     io_srv_(),
     data_rx_(io_srv_.context()),
-    //status_rx_(io_srv_.context()),
+    status_rx_(io_srv_.context()),
     reconfigure_server_()
 {;}
 
@@ -71,7 +71,6 @@ void OculusDriver::onInit() {
   }
 
   io_srv_.start();
-
 }
 
 
@@ -136,7 +135,7 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
 
   for (unsigned int r = 0; r < num_ranges; r++) {
     for (unsigned int b = 0; b < num_bearings; b++) {
-      sonar_msg.intensities.push_back(ping.image().at(b, r));
+      //sonar_msg.intensities.push_back(ping.image().at(b, r));
     }
   }
   imaging_sonar_pub_.publish(sonar_msg);
