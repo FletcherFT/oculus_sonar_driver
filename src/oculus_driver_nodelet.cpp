@@ -7,6 +7,7 @@
 #include <apl_msgs/RawData.h>
 
 #include "oculus_sonar_driver/OculusDriver.h"
+#include "oculus_sonar_driver/publishing_data_rx.h"
 
 namespace oculus_sonar_driver {
 
@@ -30,8 +31,8 @@ void OculusDriver::onInit() {
   ros::NodeHandle n_(getMTNodeHandle());
   ros::NodeHandle pn_(getMTPrivateNodeHandle());
 
-  NODELET_INFO_STREAM("Advertising topics in namespace " << n_.getNamespace());
-  NODELET_INFO_STREAM("Private namespace would be:" << pn_.getNamespace());
+  NODELET_DEBUG_STREAM("Advertising topics in namespace " << n_.getNamespace());
+  NODELET_DEBUG_STREAM("Private namespace would be:" << pn_.getNamespace());
 
   imaging_sonar_pub_ = n_.advertise<acoustic_msgs::SonarImage>("sonar_image", 100);
   raw_data_pub_ = n_.advertise<apl_msgs::RawData>("raw_data", 100);
@@ -45,6 +46,8 @@ void OculusDriver::onInit() {
 
   n_.param<std::string>("frameId", frame_id_, "");
   NODELET_INFO_STREAM("Publishing data with frame = " << frame_id_);
+
+  data_rx_.setRawPublisher(raw_data_pub_);
 
   data_rx_.setSimplePingCallback(std::bind(&OculusDriver::pingCallback,
                                              this, std::placeholders::_1));
@@ -61,10 +64,10 @@ void OculusDriver::onInit() {
 
   if (ip_address_ == "auto") {
     NODELET_INFO_STREAM("Attempting to auto-detect sonar");
-    // status_rx_.setCallback( [&](const liboculus::SonarStatus &status, bool is_valid) {
-    //   if (!is_valid || data_rx_.isConnected()) return;
-    //   data_rx_.connect(status.ipAddr());
-    // });
+    status_rx_.setCallback( [&](const liboculus::SonarStatus &status, bool is_valid) {
+      if (!is_valid || data_rx_.isConnected()) return;
+      data_rx_.connect(status.ipAddr());
+    });
   } else {
     NODELET_INFO_STREAM("Opening sonar at " << ip_address_);
     data_rx_.connect(ip_address_);
@@ -78,22 +81,10 @@ void OculusDriver::onInit() {
 void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   NODELET_INFO_STREAM("In ping callback");
 
-  apl_msgs::RawData raw_msg;
-  // NOTE(lindzey): I don't think we're supposed to use seq this way, but
-  //     I also don't know that it breaks anything.
-  raw_msg.header.seq = ping.ping()->pingId;
-  raw_msg.header.stamp = ros::Time::now();
-  raw_msg.header.frame_id = frame_id_;
-  raw_msg.direction = apl_msgs::RawData::DATA_IN;
-  auto raw_size = ping.buffer().size();
-  raw_msg.data.resize(raw_size);
-  memcpy(raw_msg.data.data(), ping.buffer().data(), raw_size);
-  raw_data_pub_.publish(raw_msg);
-
   // Publish message parsed into the image format
   acoustic_msgs::SonarImage sonar_msg;
   sonar_msg.header.seq = ping.ping()->pingId;
-  sonar_msg.header.stamp = raw_msg.header.stamp;
+  sonar_msg.header.stamp = ros::Time::now();
   sonar_msg.header.frame_id = frame_id_;
   sonar_msg.frequency = ping.ping()->frequency;
 
@@ -107,7 +98,7 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   } else {
     ROS_ERROR_STREAM("Unsupported frequency received from oculus: "
                      << sonar_msg.frequency << ". Not publishing SonarImage "
-                     << "for seq# " << raw_msg.header.seq);
+                     << "for seq# " << sonar_msg.header.seq);
     return;
   }
 
@@ -131,11 +122,19 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
 
   // Only handle single-byte data for right now
   sonar_msg.is_bigendian = false;
-  sonar_msg.data_size = 1;
+  sonar_msg.data_size = ping.dataSize();
 
   for (unsigned int r = 0; r < num_ranges; r++) {
     for (unsigned int b = 0; b < num_bearings; b++) {
-      //sonar_msg.intensities.push_back(ping.image().at(b, r));
+      const uint16_t data = ping.image().at_uint16(b,r);
+
+      if (ping.dataSize() == 1) {
+        sonar_msg.intensities.push_back(data & 0xFF);
+      } else if (ping.dataSize() == 2) {
+        // Data is stored little-endian (lower byte first)
+        sonar_msg.intensities.push_back(data & 0xFF);
+        sonar_msg.intensities.push_back((data & 0xFF00) >> 8);
+      }
     }
   }
   imaging_sonar_pub_.publish(sonar_msg);

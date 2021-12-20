@@ -17,10 +17,11 @@
 
 // Used to get sonar ping info
 #include "liboculus/OculusStructs.h"
-#include "liboculus/DataRx.h"
 #include "liboculus/StatusRx.h"
 #include "liboculus/IoServiceThread.h"
 #include "liboculus/SonarConfiguration.h"
+
+#include "oculus_sonar_driver/publishing_data_rx.h"
 
 // Auto-generated files
 #include "oculus_sonar_driver/OculusSonarConfig.h"
@@ -44,7 +45,7 @@ class OculusDriver : public nodelet::Nodelet {
   void onInit() override;
 
   liboculus::IoServiceThread io_srv_;
-  liboculus::DataRx data_rx_;
+  PublishingDataRx data_rx_;
   liboculus::StatusRx status_rx_;
 
   ros::Publisher imaging_sonar_pub_;
