@@ -6,6 +6,7 @@
 #include <acoustic_msgs/SonarImage.h>
 #include <apl_msgs/RawData.h>
 
+#include "liboculus/Constants.h"
 #include "oculus_sonar_driver/OculusDriver.h"
 #include "oculus_sonar_driver/publishing_data_rx.h"
 
@@ -90,11 +91,11 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
 
   // \todo This is actually frequency dependent
   if (sonar_msg.frequency > 2000000) {
-    sonar_msg.azimuth_beamwidth = 0.4*M_PI/180;
-    sonar_msg.elevation_beamwidth = 12*M_PI/180;
+    sonar_msg.azimuth_beamwidth = liboculus::Oculus_2100MHz::AzimuthBeamwidthRad;
+    sonar_msg.elevation_beamwidth = liboculus::Oculus_2100MHz::ElevationBeamwidthRad;
   } else if ((sonar_msg.frequency > 1100000) && (sonar_msg.frequency < 1300000)) {
-    sonar_msg.azimuth_beamwidth = 0.6*M_PI/180;
-    sonar_msg.elevation_beamwidth = 20*M_PI/180;
+    sonar_msg.azimuth_beamwidth = liboculus::Oculus_1200MHz::AzimuthBeamwidthRad;
+    sonar_msg.elevation_beamwidth = liboculus::Oculus_1200MHz::ElevationBeamwidthRad;
   } else {
     ROS_ERROR_STREAM("Unsupported frequency received from oculus: "
                      << sonar_msg.frequency << ". Not publishing SonarImage "
@@ -105,22 +106,18 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   const int num_bearings = ping.ping()->nBeams;
   const int num_ranges = ping.ping()->nRanges;
 
-  // QUESTION(lindzey): it looks like bearings is commented out of the OculusSimplePingResult...
-  // ANSWER(aaron): It's not commented out, the "bearing[]" is a ghost
-  // indicating "there's a variable length array of shorts here but we're
-  // not going to actually assign it a variable in the struct"
-  // This is then followed by the block of sonar data...
+  sonar_msg.azimuth_angles.resize(num_bearings);
   for (unsigned int b = 0; b < num_bearings; b++) {
-    sonar_msg.azimuth_angles.push_back(ping.bearings().at(b) * M_PI/180);
+    sonar_msg.azimuth_angles[b] = ping.bearings().at_rad(b);
   }
 
   // QUESTION(lindzey): Is this actually right?
   //    Do their ranges start at 0, or at the min range of 10 cm?
+  sonar_msg.ranges.resize(num_ranges);
   for (unsigned int i = 0; i < num_ranges; i++) {
-    sonar_msg.ranges.push_back(float(i+0.5) * ping.ping()->rangeResolution);
+    sonar_msg.ranges[i] = float(i+0.5) * ping.ping()->rangeResolution;
   }
 
-  // Only handle single-byte data for right now
   sonar_msg.is_bigendian = false;
   sonar_msg.data_size = ping.dataSize();
 
