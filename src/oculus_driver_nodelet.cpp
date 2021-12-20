@@ -80,8 +80,6 @@ void OculusDriver::onInit() {
 
 // Processes and publishes sonar pings to a ROS topic
 void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
-  NODELET_INFO_STREAM("In ping callback");
-
   // Publish message parsed into the image format
   acoustic_msgs::SonarImage sonar_msg;
   sonar_msg.header.seq = ping.ping()->pingId;
@@ -113,6 +111,9 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
 
   // QUESTION(lindzey): Is this actually right?
   //    Do their ranges start at 0, or at the min range of 10 cm?
+  // (Aaron):  We don't actually know.  Given there's no way to
+  // set "minimum range", and it's not in the data struct, we
+  // have to assume...
   sonar_msg.ranges.resize(num_ranges);
   for (unsigned int i = 0; i < num_ranges; i++) {
     sonar_msg.ranges[i] = float(i+0.5) * ping.ping()->rangeResolution;
@@ -123,7 +124,7 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
 
   for (unsigned int r = 0; r < num_ranges; r++) {
     for (unsigned int b = 0; b < num_bearings; b++) {
-      const uint16_t data = ping.image().at_uint16(b,r);
+      const uint16_t data = ping.image().at_uint16(b, r);
 
       if (ping.dataSize() == 1) {
         sonar_msg.intensities.push_back(data & 0xFF);
