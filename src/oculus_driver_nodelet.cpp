@@ -111,12 +111,15 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
 
   // QUESTION(lindzey): Is this actually right?
   //    Do their ranges start at 0, or at the min range of 10 cm?
+  //
   // (Aaron):  We don't actually know.  Given there's no way to
-  // set "minimum range", and it's not in the data struct, we
-  // have to assume...
+  //    set "minimum range", and it's not in the data struct, we
+  //    have to assume is starts from zero, though as you say, it
+  //    could actually be another arbitrary constant.
   sonar_msg.ranges.resize(num_ranges);
   for (unsigned int i = 0; i < num_ranges; i++) {
-    sonar_msg.ranges[i] = float(i+0.5) * ping.ping()->rangeResolution;
+    sonar_msg.ranges[i] = static_cast<float>(i+0.5) 
+                            * ping.ping()->rangeResolution;
   }
 
   sonar_msg.is_bigendian = false;
@@ -159,21 +162,23 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
 
   // I would prefer to just or some consts together, but didn't see a clean
   // way to do that within dynamic reconfig. Ugly works.
-  uint8_t flags = 0;
-  if (config.range_as_meters)    flags += 1;
-  if (config.data_16bit)         flags += 2;
-  if (config.send_gain)          flags += 4;
-  if (config.send_simple_return) flags += 8;
-  if (config.gain_assistance)    flags += 16;
-  if (config.all_beams)          flags += 64;  // 0x40
-  ROS_INFO_STREAM("Setting flags: " << 1.0 * flags
-                  << "\n   range is meters " << config.range_as_meters
-                  << "\n   data is 16 bit  " << config.data_16bit
-                  << "\n   send gain       " << config.send_gain
-                  << "\n   simple return   " << config.send_simple_return
-                  << "\n   gain assistance " << config.gain_assistance
-                  << "\n   use 512 beams   " << config.all_beams);
-  sonar_config_.setFlags(flags);
+  sonar_config_.flags().setRangeAsMeters(config.range_as_meters)
+                        .setData16Bit(config.data_16bit)
+                        .setSendGain(config.send_gain)
+                        .setSimpleReturn(config.send_simple_return)
+                        .setGainAssistance(config.gain_assistance)
+                        .set512Beams(config.all_beams);
+
+  ROS_INFO_STREAM("Setting flags: 0x"
+            << std::hex << std::setw(2) << std::setfill('0')
+            << static_cast<unsigned int>(sonar_config_.flags()())
+            << std::dec << std::setw(0)
+            << "\n   range is meters " << sonar_config_.flags().getRangeAsMeters()
+            << "\n   data is 16 bit  " << sonar_config_.flags().getData16Bit()
+            << "\n   send gain       " << sonar_config_.flags().getSendGain()
+            << "\n   simple return   " << sonar_config_.flags().getSimpleReturn()
+            << "\n   gain assistance " << sonar_config_.flags().getGainAssistance()
+            << "\n   use 512 beams   " << sonar_config_.flags().get512Beams());
 
   // Update the sonar with new params
   if (data_rx_.isConnected()) {

@@ -16,7 +16,7 @@
 
 
 // Used to get sonar ping info
-#include "liboculus/OculusStructs.h"
+#include "liboculus/SimplePingResult.h"
 #include "liboculus/StatusRx.h"
 #include "liboculus/IoServiceThread.h"
 #include "liboculus/SonarConfiguration.h"
