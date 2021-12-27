@@ -5,15 +5,17 @@
 
 #include <apl_msgs/RawData.h>
 
+#include <vector>
+
 #include "liboculus/DataRx.h"
 
 namespace oculus_sonar_driver {
 
 class PublishingDataRx : public liboculus::DataRx {
  public:
-  PublishingDataRx(const std::shared_ptr<boost::asio::io_context> &iosrv) 
-          : DataRx(iosrv),
-          count_(0) 
+  PublishingDataRx(const liboculus::IoServiceThread::IoContextPtr &iosrv)
+    : DataRx(iosrv),
+      count_(0)
   {;}
 
   ~PublishingDataRx() {;}
@@ -23,15 +25,15 @@ class PublishingDataRx : public liboculus::DataRx {
       raw_data_pub_ = pub;
   }
 
-  virtual void haveWritten(const std::vector<uint8_t> &bytes) override {
-    doPublish(bytes,apl_msgs::RawData::DATA_OUT);
+  void haveWritten(const std::vector<uint8_t> &bytes) override {
+    doPublish(bytes, apl_msgs::RawData::DATA_OUT);
   }
 
-  virtual void haveRead(const std::vector<uint8_t> &bytes) override {
-    doPublish(bytes,apl_msgs::RawData::DATA_IN);
+  void haveRead(const std::vector<uint8_t> &bytes) override {
+    doPublish(bytes, apl_msgs::RawData::DATA_IN);
   }
 
-  void doPublish(const std::vector<uint8_t> &bytes, 
+  void doPublish(const std::vector<uint8_t> &bytes,
                   uint8_t direction) {
     if (bytes.size() == 0) return;
 
@@ -39,7 +41,7 @@ class PublishingDataRx : public liboculus::DataRx {
 
     raw_msg.header.seq = count_++;
     raw_msg.header.stamp = ros::Time::now();
-    raw_msg.direction = direction; 
+    raw_msg.direction = direction;
     auto raw_size = bytes.size();
     raw_msg.data.resize(raw_size);
     memcpy(raw_msg.data.data(), bytes.data(), raw_size);
@@ -49,7 +51,6 @@ class PublishingDataRx : public liboculus::DataRx {
   ros::Publisher raw_data_pub_;
 
   unsigned int count_;
-
 };
 
 }
