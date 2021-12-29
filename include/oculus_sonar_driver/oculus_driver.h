@@ -1,4 +1,4 @@
-// Copyright 2020 UW-APL
+// Copyright 2020-2022 UW-APL
 // Authors: Aaron Marburg, Laura Lindzey
 
 #pragma once

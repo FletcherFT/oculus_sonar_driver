@@ -4,4 +4,9 @@
       A nodelet driver for Oculus sonar.
     </description>
   </class>
+  <class name="oculus_sonar/reprocess_raw_data" type="oculus_sonar_driver::ReprocessOculusRawData" base_class_type="nodelet::Nodelet">
+    <description>
+    Subscribes to apl_msgs::RawData and publishes SonarImages.
+    </description>
+  </class>
 </library>

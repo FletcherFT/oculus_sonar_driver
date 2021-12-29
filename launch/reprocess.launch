@@ -1,0 +1,13 @@
+<!-- Launches oculus_publisher, oculus_subscriber, and dynamic reconfigure gui
+     with default sonar parameters (as defined in SimpleFireMessage.cpp)
+-->
+<launch>
+  <arg name="draw_sonar" default="false"/>
+
+  <!--  launch-prefix="gdb -ex run args" -->
+  <node name="reprocess_oculus" pkg="oculus_sonar_driver" type="reprocess_oculus_raw_data" output="screen">
+    <remap from="raw_data" to="/oculus/raw_data"/>
+  </node>
+  <!-- <node pkg="oculus_sonar_driver" type="oculus_draw" name="oculus_draw" if=${arg draw_sonar}/> -->
+
+</launch>

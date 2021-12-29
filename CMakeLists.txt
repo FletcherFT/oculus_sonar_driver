@@ -55,10 +55,14 @@ include_directories(
 )
 
 
-add_library(oculus_driver_nodelet src/oculus_driver_nodelet.cpp)
+add_library(oculus_driver_nodelet 
+            src/oculus_driver_nodelet.cpp
+            src/reprocess_oculus_raw_data.cpp
+            src/ping_to_sonar_image.cpp)
 target_link_libraries(oculus_driver_nodelet ${catkin_LIBRARIES})
 class_loader_hide_library_symbols(oculus_driver_nodelet)
 
+####
 add_executable(oculus_driver src/oculus_node.cpp)
 target_link_libraries(oculus_driver
   ${catkin_LIBRARIES}
@@ -68,10 +72,22 @@ add_dependencies(oculus_driver
   ${PROJECT_NAME}_gencfg
 )
 
-install(TARGETS oculus_driver
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} )
+#### 
+add_executable(reprocess_oculus_raw_data src/reprocess_oculus_raw_data_node.cpp)
+target_link_libraries(reprocess_oculus_raw_data
+  ${catkin_LIBRARIES}
+)
+add_dependencies(reprocess_oculus_raw_data
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg
+)
 
-install(TARGETS oculus_driver_nodelet
+####
+install(TARGETS oculus_driver
+                reprocess_oculus_raw_data
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} )
+
+install(TARGETS oculus_driver_nodelet 
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

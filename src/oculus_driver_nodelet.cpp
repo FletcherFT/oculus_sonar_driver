@@ -7,8 +7,9 @@
 #include <apl_msgs/RawData.h>
 
 #include "liboculus/Constants.h"
-#include "oculus_sonar_driver/OculusDriver.h"
+#include "oculus_sonar_driver/oculus_driver.h"
 #include "oculus_sonar_driver/publishing_data_rx.h"
+#include "oculus_sonar_driver/ping_to_sonar_image.h"
 
 namespace oculus_sonar_driver {
 
@@ -81,63 +82,65 @@ void OculusDriver::onInit() {
 // Processes and publishes sonar pings to a ROS topic
 void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   // Publish message parsed into the image format
-  acoustic_msgs::SonarImage sonar_msg;
+  acoustic_msgs::SonarImage sonar_msg = pingToSonarImage(ping);
+
   sonar_msg.header.seq = ping.ping()->pingId;
   sonar_msg.header.stamp = ros::Time::now();
   sonar_msg.header.frame_id = frame_id_;
-  sonar_msg.frequency = ping.ping()->frequency;
+ 
+  // sonar_msg.frequency = ping.ping()->frequency;
 
-  // \todo This is actually frequency dependent
-  if (sonar_msg.frequency > 2000000) {
-    sonar_msg.azimuth_beamwidth = liboculus::Oculus_2100MHz::AzimuthBeamwidthRad;
-    sonar_msg.elevation_beamwidth = liboculus::Oculus_2100MHz::ElevationBeamwidthRad;
-  } else if ((sonar_msg.frequency > 1100000) && (sonar_msg.frequency < 1300000)) {
-    sonar_msg.azimuth_beamwidth = liboculus::Oculus_1200MHz::AzimuthBeamwidthRad;
-    sonar_msg.elevation_beamwidth = liboculus::Oculus_1200MHz::ElevationBeamwidthRad;
-  } else {
-    ROS_ERROR_STREAM("Unsupported frequency received from oculus: "
-                     << sonar_msg.frequency << ". Not publishing SonarImage "
-                     << "for seq# " << sonar_msg.header.seq);
-    return;
-  }
+  // // \todo This is actually frequency dependent
+  // if (sonar_msg.frequency > 2000000) {
+  //   sonar_msg.azimuth_beamwidth = liboculus::Oculus_2100MHz::AzimuthBeamwidthRad;
+  //   sonar_msg.elevation_beamwidth = liboculus::Oculus_2100MHz::ElevationBeamwidthRad;
+  // } else if ((sonar_msg.frequency > 1100000) && (sonar_msg.frequency < 1300000)) {
+  //   sonar_msg.azimuth_beamwidth = liboculus::Oculus_1200MHz::AzimuthBeamwidthRad;
+  //   sonar_msg.elevation_beamwidth = liboculus::Oculus_1200MHz::ElevationBeamwidthRad;
+  // } else {
+  //   ROS_ERROR_STREAM("Unsupported frequency received from oculus: "
+  //                    << sonar_msg.frequency << ". Not publishing SonarImage "
+  //                    << "for seq# " << sonar_msg.header.seq);
+  //   return;
+  // }
 
-  const int num_bearings = ping.ping()->nBeams;
-  const int num_ranges = ping.ping()->nRanges;
+  // const int num_bearings = ping.ping()->nBeams;
+  // const int num_ranges = ping.ping()->nRanges;
 
-  sonar_msg.azimuth_angles.resize(num_bearings);
-  for (unsigned int b = 0; b < num_bearings; b++) {
-    sonar_msg.azimuth_angles[b] = ping.bearings().at_rad(b);
-  }
+  // sonar_msg.azimuth_angles.resize(num_bearings);
+  // for (unsigned int b = 0; b < num_bearings; b++) {
+  //   sonar_msg.azimuth_angles[b] = ping.bearings().at_rad(b);
+  // }
 
-  // QUESTION(lindzey): Is this actually right?
-  //    Do their ranges start at 0, or at the min range of 10 cm?
-  //
-  // (Aaron):  We don't actually know.  Given there's no way to
-  //    set "minimum range", and it's not in the data struct, we
-  //    have to assume is starts from zero, though as you say, it
-  //    could actually be another arbitrary constant.
-  sonar_msg.ranges.resize(num_ranges);
-  for (unsigned int i = 0; i < num_ranges; i++) {
-    sonar_msg.ranges[i] = static_cast<float>(i+0.5) 
-                            * ping.ping()->rangeResolution;
-  }
+  // // QUESTION(lindzey): Is this actually right?
+  // //    Do their ranges start at 0, or at the min range of 10 cm?
+  // //
+  // // (Aaron):  We don't actually know.  Given there's no way to
+  // //    set "minimum range", and it's not in the data struct, we
+  // //    have to assume is starts from zero, though as you say, it
+  // //    could actually be another arbitrary constant.
+  // sonar_msg.ranges.resize(num_ranges);
+  // for (unsigned int i = 0; i < num_ranges; i++) {
+  //   sonar_msg.ranges[i] = static_cast<float>(i+0.5) 
+  //                           * ping.ping()->rangeResolution;
+  // }
 
-  sonar_msg.is_bigendian = false;
-  sonar_msg.data_size = ping.dataSize();
+  // sonar_msg.is_bigendian = false;
+  // sonar_msg.data_size = ping.dataSize();
 
-  for (unsigned int r = 0; r < num_ranges; r++) {
-    for (unsigned int b = 0; b < num_bearings; b++) {
-      const uint16_t data = ping.image().at_uint16(b, r);
+  // for (unsigned int r = 0; r < num_ranges; r++) {
+  //   for (unsigned int b = 0; b < num_bearings; b++) {
+  //     const uint16_t data = ping.image().at_uint16(b, r);
 
-      if (ping.dataSize() == 1) {
-        sonar_msg.intensities.push_back(data & 0xFF);
-      } else if (ping.dataSize() == 2) {
-        // Data is stored little-endian (lower byte first)
-        sonar_msg.intensities.push_back(data & 0xFF);
-        sonar_msg.intensities.push_back((data & 0xFF00) >> 8);
-      }
-    }
-  }
+  //     if (ping.dataSize() == 1) {
+  //       sonar_msg.intensities.push_back(data & 0xFF);
+  //     } else if (ping.dataSize() == 2) {
+  //       // Data is stored little-endian (lower byte first)
+  //       sonar_msg.intensities.push_back(data & 0xFF);
+  //       sonar_msg.intensities.push_back((data & 0xFF00) >> 8);
+  //     }
+  //   }
+  // }
   imaging_sonar_pub_.publish(sonar_msg);
 }
 
