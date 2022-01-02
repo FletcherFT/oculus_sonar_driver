@@ -8,7 +8,11 @@
   <arg name="pingRate" default="0"/>
   <arg name="freqMode" default="2"/>
   <arg name="ipAddress" default="auto"/>
+  <arg name="send_gain" default="true"/>
   <arg name="data_16bit" default="false"/>
+
+  <!-- If true, also launches a sonar_draw node -->
+  <arg name="sonar_draw" default="false"/>
 
   <!--  launch-prefix="gdb -ex run args" -->
   <node name="oculus" pkg="oculus_sonar_driver" type="oculus_driver" output="screen">
@@ -18,9 +22,11 @@
     <param name="gamma" value="$(arg gamma)"/>
     <param name="gainPercent" value="$(arg gainPercent)"/>
     <param name="freqMode" value="$(arg freqMode)"/>
-    <param name="data_16bit" value="$(arg data_16bit)"/>
+    <param name="data_16bit" value="$(arg data16bit)"/>
+    <param name="send_gain" value="$(arg sendGain"/>
   </node>
-  <!-- <node pkg="oculus_sonar_driver" type="oculus_draw" name="oculus_draw"/> -->
+
+  <node pkg="oculus_sonar_driver" type="oculus_draw" name="oculus_draw" if="$(arg sonar_draw)"/>
   <!-- <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="rqt_reconfigure"/> -->
 
 </launch>
