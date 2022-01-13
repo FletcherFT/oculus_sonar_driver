@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(oculus_sonar_driver)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-#add_compile_options(-std=c++14)
+add_compile_options(-std=c++14)
 
 set(OpenCV_DIR /usr/share/OpenCV/)
 
@@ -23,15 +23,15 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  apl_msgs
 )
 
 ## Build messages
-add_message_files(
-  FILES
-  OculusSonarRawMsg.msg
-)
+# add_message_files(
+#   FILES
+# )
 
-generate_messages(DEPENDENCIES std_msgs sensor_msgs)
+#generate_messages(DEPENDENCIES std_msgs sensor_msgs)
 
 
 #add dynamic reconfigure api
@@ -39,7 +39,7 @@ generate_dynamic_reconfigure_options(
   cfg/OculusSonar.cfg
 )
 
-## Compile as C++11, supported in ROS Kinetic and newer
+## Compile as C++14, supported in ROS Kinetic and newer
 add_compile_options(-std=c++14)
 
 
@@ -55,10 +55,14 @@ include_directories(
 )
 
 
-add_library(oculus_driver_nodelet src/oculus_driver_nodelet.cpp)
+add_library(oculus_driver_nodelet 
+            src/oculus_driver_nodelet.cpp
+            src/reprocess_oculus_raw_data.cpp
+            src/ping_to_sonar_image.cpp)
 target_link_libraries(oculus_driver_nodelet ${catkin_LIBRARIES})
 class_loader_hide_library_symbols(oculus_driver_nodelet)
 
+####
 add_executable(oculus_driver src/oculus_node.cpp)
 target_link_libraries(oculus_driver
   ${catkin_LIBRARIES}
@@ -68,10 +72,22 @@ add_dependencies(oculus_driver
   ${PROJECT_NAME}_gencfg
 )
 
-install(TARGETS oculus_driver
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} )
+#### 
+add_executable(reprocess_oculus_raw_data src/reprocess_oculus_raw_data_node.cpp)
+target_link_libraries(reprocess_oculus_raw_data
+  ${catkin_LIBRARIES}
+)
+add_dependencies(reprocess_oculus_raw_data
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg
+)
 
-install(TARGETS oculus_driver_nodelet
+####
+install(TARGETS oculus_driver
+                reprocess_oculus_raw_data
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} )
+
+install(TARGETS oculus_driver_nodelet 
 	      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

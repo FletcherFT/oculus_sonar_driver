@@ -1,7 +1,12 @@
 <library path="lib/liboculus_driver_nodelet">
-    <class name="oculus_sonar/driver" type="oculus_sonar::OculusDriver" base_class_type="nodelet::Nodelet">
+    <class name="oculus_sonar/driver" type="oculus_sonar_driver::OculusDriver" base_class_type="nodelet::Nodelet">
     <description>
       A nodelet driver for Oculus sonar.
+    </description>
+  </class>
+  <class name="oculus_sonar/reprocess_raw_data" type="oculus_sonar_driver::ReprocessOculusRawData" base_class_type="nodelet::Nodelet">
+    <description>
+    Subscribes to apl_msgs::RawData and publishes SonarImages.
     </description>
   </class>
 </library>

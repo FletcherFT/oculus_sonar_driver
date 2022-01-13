@@ -1,30 +1,32 @@
-// Copyright 2020 UW-APL
+// Copyright 2020-2022 UW-APL
 // Authors: Aaron Marburg, Laura Lindzey
 
 #pragma once
 
-#include "ros/ros.h"
-#include "nodelet/nodelet.h"
-#include "std_msgs/String.h"
+
 #include <cstdlib>
 #include <sstream>
 #include <string>
-
 #include <memory>
+
+#include "ros/ros.h"
+#include "nodelet/nodelet.h"
+#include "std_msgs/String.h"
+#include <dynamic_reconfigure/server.h>
+
 
 // Used to get sonar ping info
 #include "liboculus/SimplePingResult.h"
-#include "liboculus/SonarClient.h"
+#include "liboculus/StatusRx.h"
+#include "liboculus/IoServiceThread.h"
 #include "liboculus/SonarConfiguration.h"
 
-// Allow dynamic reconfigure of sonar parameters
-#include <dynamic_reconfigure/server.h>
+#include "oculus_sonar_driver/publishing_data_rx.h"
 
 // Auto-generated files
-#include "oculus_sonar_driver/OculusSonarRawMsg.h"
 #include "oculus_sonar_driver/OculusSonarConfig.h"
 
-namespace oculus_sonar {
+namespace oculus_sonar_driver {
 
 class OculusDriver : public nodelet::Nodelet {
  public:
@@ -33,6 +35,7 @@ class OculusDriver : public nodelet::Nodelet {
 
   // Translate SimplePingResult to SonarImage and publish
   void pingCallback(const liboculus::SimplePingResult &ping);
+
   // Update configuration based on command from dynamic_reconfigure
   void configCallback(const oculus_sonar_driver::OculusSonarConfig &config,
                       uint32_t level);
@@ -41,10 +44,12 @@ class OculusDriver : public nodelet::Nodelet {
   // Set up all ROS interfaces and start the sonarClient
   void onInit() override;
 
-  std::unique_ptr< liboculus::SonarClient > sonar_client_;
+  liboculus::IoServiceThread io_srv_;
+  PublishingDataRx data_rx_;
+  liboculus::StatusRx status_rx_;
 
   ros::Publisher imaging_sonar_pub_;
-  ros::Publisher oculus_raw_pub_;
+  ros::Publisher raw_data_pub_;
   std::string ip_address_;
   std::string frame_id_;
 
