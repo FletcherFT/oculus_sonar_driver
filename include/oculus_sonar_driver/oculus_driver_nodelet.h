@@ -34,7 +34,9 @@ class OculusDriver : public nodelet::Nodelet {
   virtual ~OculusDriver();
 
   // Translate SimplePingResult to SonarImage and publish
-  void pingCallback(const liboculus::SimplePingResult &ping);
+  void pingCallback(const liboculus::SimplePingResultV1 &ping);
+  void ping2Callback(const liboculus::SimplePingResultV2 &ping);
+
 
   // Update configuration based on command from dynamic_reconfigure
   void configCallback(const oculus_sonar_driver::OculusSonarConfig &config,

@@ -7,7 +7,7 @@
 #include <apl_msgs/RawData.h>
 
 #include "liboculus/Constants.h"
-#include "oculus_sonar_driver/oculus_driver.h"
+#include "oculus_sonar_driver/oculus_driver_nodelet.h"
 #include "oculus_sonar_driver/publishing_data_rx.h"
 #include "oculus_sonar_driver/ping_to_sonar_image.h"
 
@@ -54,6 +54,9 @@ void OculusDriver::onInit() {
   data_rx_.setSimplePingCallback(std::bind(&OculusDriver::pingCallback,
                                              this, std::placeholders::_1));
 
+  data_rx_.setSimplePing2Callback(std::bind(&OculusDriver::ping2Callback,
+                                             this, std::placeholders::_1));
+
   // When the node connects, start the sonar pinging by sending
   // a OculusSimpleFireMessage current configuration.
   data_rx_.setOnConnectCallback( [&]() {
@@ -80,7 +83,7 @@ void OculusDriver::onInit() {
 
 
 // Processes and publishes sonar pings to a ROS topic
-void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
+void OculusDriver::pingCallback(const liboculus::SimplePingResultV1 &ping) {
   // Publish message parsed into the image format
   acoustic_msgs::SonarImage sonar_msg = pingToSonarImage(ping);
 
@@ -141,6 +144,17 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResult &ping) {
   //     }
   //   }
   // }
+  imaging_sonar_pub_.publish(sonar_msg);
+}
+
+
+void OculusDriver::ping2Callback(const liboculus::SimplePingResultV2 &ping) {
+  // Publish message parsed into the image format
+  acoustic_msgs::SonarImage sonar_msg = pingToSonarImage(ping);
+
+  sonar_msg.header.seq = ping.ping()->pingId;
+  sonar_msg.header.stamp = ros::Time::now();
+  sonar_msg.header.frame_id = frame_id_;
   imaging_sonar_pub_.publish(sonar_msg);
 }
 

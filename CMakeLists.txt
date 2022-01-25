@@ -57,8 +57,7 @@ include_directories(
 
 add_library(oculus_driver_nodelet 
             src/oculus_driver_nodelet.cpp
-            src/reprocess_oculus_raw_data.cpp
-            src/ping_to_sonar_image.cpp)
+            src/reprocess_oculus_raw_data.cpp)
 target_link_libraries(oculus_driver_nodelet ${catkin_LIBRARIES})
 class_loader_hide_library_symbols(oculus_driver_nodelet)
 
