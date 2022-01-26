@@ -90,60 +90,6 @@ void OculusDriver::pingCallback(const liboculus::SimplePingResultV1 &ping) {
   sonar_msg.header.seq = ping.ping()->pingId;
   sonar_msg.header.stamp = ros::Time::now();
   sonar_msg.header.frame_id = frame_id_;
- 
-  // sonar_msg.frequency = ping.ping()->frequency;
-
-  // // \todo This is actually frequency dependent
-  // if (sonar_msg.frequency > 2000000) {
-  //   sonar_msg.azimuth_beamwidth = liboculus::Oculus_2100MHz::AzimuthBeamwidthRad;
-  //   sonar_msg.elevation_beamwidth = liboculus::Oculus_2100MHz::ElevationBeamwidthRad;
-  // } else if ((sonar_msg.frequency > 1100000) && (sonar_msg.frequency < 1300000)) {
-  //   sonar_msg.azimuth_beamwidth = liboculus::Oculus_1200MHz::AzimuthBeamwidthRad;
-  //   sonar_msg.elevation_beamwidth = liboculus::Oculus_1200MHz::ElevationBeamwidthRad;
-  // } else {
-  //   ROS_ERROR_STREAM("Unsupported frequency received from oculus: "
-  //                    << sonar_msg.frequency << ". Not publishing SonarImage "
-  //                    << "for seq# " << sonar_msg.header.seq);
-  //   return;
-  // }
-
-  // const int num_bearings = ping.ping()->nBeams;
-  // const int num_ranges = ping.ping()->nRanges;
-
-  // sonar_msg.azimuth_angles.resize(num_bearings);
-  // for (unsigned int b = 0; b < num_bearings; b++) {
-  //   sonar_msg.azimuth_angles[b] = ping.bearings().at_rad(b);
-  // }
-
-  // // QUESTION(lindzey): Is this actually right?
-  // //    Do their ranges start at 0, or at the min range of 10 cm?
-  // //
-  // // (Aaron):  We don't actually know.  Given there's no way to
-  // //    set "minimum range", and it's not in the data struct, we
-  // //    have to assume is starts from zero, though as you say, it
-  // //    could actually be another arbitrary constant.
-  // sonar_msg.ranges.resize(num_ranges);
-  // for (unsigned int i = 0; i < num_ranges; i++) {
-  //   sonar_msg.ranges[i] = static_cast<float>(i+0.5) 
-  //                           * ping.ping()->rangeResolution;
-  // }
-
-  // sonar_msg.is_bigendian = false;
-  // sonar_msg.data_size = ping.dataSize();
-
-  // for (unsigned int r = 0; r < num_ranges; r++) {
-  //   for (unsigned int b = 0; b < num_bearings; b++) {
-  //     const uint16_t data = ping.image().at_uint16(b, r);
-
-  //     if (ping.dataSize() == 1) {
-  //       sonar_msg.intensities.push_back(data & 0xFF);
-  //     } else if (ping.dataSize() == 2) {
-  //       // Data is stored little-endian (lower byte first)
-  //       sonar_msg.intensities.push_back(data & 0xFF);
-  //       sonar_msg.intensities.push_back((data & 0xFF00) >> 8);
-  //     }
-  //   }
-  // }
   imaging_sonar_pub_.publish(sonar_msg);
 }
 
@@ -170,32 +116,33 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
   ROS_INFO_STREAM("Setting gamma to " << config.gamma);
   sonar_config_.setGamma(config.gamma);
 
-  ROS_INFO_STREAM("Setting ping rate to (" << config.pingRate << "): "
-                  << liboculus::PingRateToHz(config.pingRate) << " Hz");
-  sonar_config_.setPingRate(static_cast<PingRateType>(config.pingRate));
+  ROS_INFO_STREAM("Setting ping rate to (" << config.ping_rate << "): "
+                  << liboculus::PingRateToHz(config.ping_rate) << " Hz");
+  sonar_config_.setPingRate(static_cast<PingRateType>(config.ping_rate));
 
-  ROS_INFO_STREAM("Setting freq mode to " << liboculus::FreqModeToString(config.freqMode));
-  sonar_config_.setFreqMode(static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freqMode));
+  ROS_INFO_STREAM("Setting freq mode to " << liboculus::FreqModeToString(config.freq_mode));
+  sonar_config_.setFreqMode(static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freq_mode));
 
   // I would prefer to just or some consts together, but didn't see a clean
   // way to do that within dynamic reconfig. Ugly works.
-  sonar_config_.flags().setRangeAsMeters(config.range_as_meters)
-                        .setData16Bit(config.data_16bit)
-                        .setSendGain(config.send_gain)
-                        .setSimpleReturn(config.send_simple_return)
-                        .setGainAssistance(config.gain_assistance)
-                        .set512Beams(config.all_beams);
+  sonar_config_.setRangeAsMeters(config.range_as_meters)
+                .setSendGain(config.send_gain)
+                .setSimpleReturn(config.send_simple_return)
+                .setGainAssistance(config.gain_assistance)
+                .set512Beams(config.all_beams);
+
+  sonar_config_.setDataSize(static_cast<liboculus::SonarConfiguration::OculusDataSize>(config.data_size));
 
   ROS_INFO_STREAM("Setting flags: 0x"
-            << std::hex << std::setw(2) << std::setfill('0')
-            << static_cast<unsigned int>(sonar_config_.flags()())
-            << std::dec << std::setw(0)
-            << "\n   range is meters " << sonar_config_.flags().getRangeAsMeters()
-            << "\n   data is 16 bit  " << sonar_config_.flags().getData16Bit()
-            << "\n   send gain       " << sonar_config_.flags().getSendGain()
-            << "\n   simple return   " << sonar_config_.flags().getSimpleReturn()
-            << "\n   gain assistance " << sonar_config_.flags().getGainAssistance()
-            << "\n   use 512 beams   " << sonar_config_.flags().get512Beams());
+            // << std::hex << std::setw(2) << std::setfill('0')
+            // << static_cast<unsigned int>(sonar_config_.flags()())
+            // << std::dec << std::setw(0)
+            << "\n   range is meters " << sonar_config_.getRangeAsMeters()
+            //<< "\n   data is 16 bit  " << sonar_config_.flags().getData16Bit()
+            << "\n   send gain       " << sonar_config_.getSendGain()
+            << "\n   simple return   " << sonar_config_.getSimpleReturn()
+            << "\n   gain assistance " << sonar_config_.getGainAssistance()
+            << "\n   use 512 beams   " << sonar_config_.get512Beams());
 
   // Update the sonar with new params
   if (data_rx_.isConnected()) {
