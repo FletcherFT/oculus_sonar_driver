@@ -22,6 +22,7 @@
 #include "liboculus/SonarConfiguration.h"
 
 #include "oculus_sonar_driver/publishing_data_rx.h"
+#include "oculus_sonar_driver/ping_to_sonar_image.h"
 
 // Auto-generated files
 #include "oculus_sonar_driver/OculusSonarConfig.h"
@@ -34,9 +35,16 @@ class OculusDriver : public nodelet::Nodelet {
   virtual ~OculusDriver();
 
   // Translate SimplePingResult to SonarImage and publish
-  void pingCallback(const liboculus::SimplePingResultV1 &ping);
-  void ping2Callback(const liboculus::SimplePingResultV2 &ping);
+  template <typename Ping_t>
+  void pingCallback(const Ping_t &ping) {
+    // Publish message parsed into the image format
+    acoustic_msgs::SonarImage sonar_msg = pingToSonarImage(ping);
 
+    sonar_msg.header.seq = ping.ping()->pingId;
+    sonar_msg.header.stamp = ros::Time::now();
+    sonar_msg.header.frame_id = frame_id_;
+    imaging_sonar_pub_.publish(sonar_msg);
+  }
 
   // Update configuration based on command from dynamic_reconfigure
   void configCallback(const oculus_sonar_driver::OculusSonarConfig &config,

@@ -9,7 +9,7 @@
   <arg name="freqMode" default="2"/>
   <arg name="ipAddress" default="auto"/>
   <arg name="send_gain" default="true"/>
-  <arg name="data_16bit" default="false"/>
+  <arg name="data16bit" default="false"/>
 
   <!-- If true, also launches a sonar_draw node -->
   <arg name="sonar_draw" default="false"/>

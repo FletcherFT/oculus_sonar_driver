@@ -9,7 +9,6 @@
 #include "liboculus/Constants.h"
 #include "oculus_sonar_driver/oculus_driver_nodelet.h"
 #include "oculus_sonar_driver/publishing_data_rx.h"
-#include "oculus_sonar_driver/ping_to_sonar_image.h"
 
 namespace oculus_sonar_driver {
 
@@ -51,11 +50,11 @@ void OculusDriver::onInit() {
 
   data_rx_.setRawPublisher(raw_data_pub_);
 
-  data_rx_.setSimplePingCallback(std::bind(&OculusDriver::pingCallback,
-                                             this, std::placeholders::_1));
+  data_rx_.setCallback<liboculus::SimplePingResultV1>(std::bind(&OculusDriver::pingCallback<liboculus::SimplePingResultV1>,
+                                            this, std::placeholders::_1));
 
-  data_rx_.setSimplePing2Callback(std::bind(&OculusDriver::ping2Callback,
-                                             this, std::placeholders::_1));
+  data_rx_.setCallback<liboculus::SimplePingResultV2>(std::bind(&OculusDriver::pingCallback<liboculus::SimplePingResultV2>,
+                                            this, std::placeholders::_1));
 
   // When the node connects, start the sonar pinging by sending
   // a OculusSimpleFireMessage current configuration.
@@ -79,29 +78,6 @@ void OculusDriver::onInit() {
   }
 
   io_srv_.start();
-}
-
-
-// Processes and publishes sonar pings to a ROS topic
-void OculusDriver::pingCallback(const liboculus::SimplePingResultV1 &ping) {
-  // Publish message parsed into the image format
-  acoustic_msgs::SonarImage sonar_msg = pingToSonarImage(ping);
-
-  sonar_msg.header.seq = ping.ping()->pingId;
-  sonar_msg.header.stamp = ros::Time::now();
-  sonar_msg.header.frame_id = frame_id_;
-  imaging_sonar_pub_.publish(sonar_msg);
-}
-
-
-void OculusDriver::ping2Callback(const liboculus::SimplePingResultV2 &ping) {
-  // Publish message parsed into the image format
-  acoustic_msgs::SonarImage sonar_msg = pingToSonarImage(ping);
-
-  sonar_msg.header.seq = ping.ping()->pingId;
-  sonar_msg.header.stamp = ros::Time::now();
-  sonar_msg.header.frame_id = frame_id_;
-  imaging_sonar_pub_.publish(sonar_msg);
 }
 
 // Updates sonar parameters
@@ -131,7 +107,13 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
                 .setGainAssistance(config.gain_assistance)
                 .set512Beams(config.all_beams);
 
-  sonar_config_.setDataSize(static_cast<liboculus::SonarConfiguration::OculusDataSize>(config.data_size));
+  switch (config.data_size) {
+    case OculusSonar_8bit:
+      sonar_config_.setDataSize(dataSize8Bit);
+      break;
+    default:
+      ROS_WARN_STREAM("Unknown data size " << config.data_size);
+  }
 
   ROS_INFO_STREAM("Setting flags: 0x"
             // << std::hex << std::setw(2) << std::setfill('0')
