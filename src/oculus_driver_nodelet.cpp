@@ -101,15 +101,24 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
 
   // I would prefer to just or some consts together, but didn't see a clean
   // way to do that within dynamic reconfig. Ugly works.
-  sonar_config_.setRangeAsMeters(config.range_as_meters)
+  sonar_config_.sendRangeAsMeters(config.send_range_as_meters)
                 .setSendGain(config.send_gain)
                 .setSimpleReturn(config.send_simple_return)
                 .setGainAssistance(config.gain_assistance)
                 .set512Beams(config.all_beams);
 
+  // Rather than trust that the .cfg and Oculus enums are the same,
+  // do an explicit mapping
+  ROS_INFO_STREAM("config.data_size: " << config.data_size);
   switch (config.data_size) {
     case OculusSonar_8bit:
       sonar_config_.setDataSize(dataSize8Bit);
+      break;
+    case OculusSonar_16bit:
+      sonar_config_.setDataSize(dataSize16Bit);
+      break;
+    case OculusSonar_32bit:
+      sonar_config_.setDataSize(dataSize32Bit);
       break;
     default:
       ROS_WARN_STREAM("Unknown data size " << config.data_size);
@@ -119,12 +128,12 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
             // << std::hex << std::setw(2) << std::setfill('0')
             // << static_cast<unsigned int>(sonar_config_.flags()())
             // << std::dec << std::setw(0)
-            << "\n   range is meters " << sonar_config_.getRangeAsMeters()
-            //<< "\n   data is 16 bit  " << sonar_config_.flags().getData16Bit()
-            << "\n   send gain       " << sonar_config_.getSendGain()
-            << "\n   simple return   " << sonar_config_.getSimpleReturn()
-            << "\n   gain assistance " << sonar_config_.getGainAssistance()
-            << "\n   use 512 beams   " << sonar_config_.get512Beams());
+            << "\n send range in meters " << sonar_config_.getSendRangeAsMeters()
+            << "\n            data size " << liboculus::DataSizeToString(sonar_config_.getDataSize())
+            << "\n      send gain       " << sonar_config_.getSendGain()
+            << "\n      simple return   " << sonar_config_.getSimpleReturn()
+            << "\n      gain assistance " << sonar_config_.getGainAssistance()
+            << "\n        use 512 beams " << sonar_config_.get512Beams());
 
   // Update the sonar with new params
   if (data_rx_.isConnected()) {

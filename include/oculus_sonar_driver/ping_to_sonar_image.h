@@ -54,20 +54,30 @@ acoustic_msgs::SonarImage pingToSonarImage(const liboculus::SimplePingResult<Pin
                             * ping.ping()->rangeResolution;
   }
 
+  // \todo  Why am I byte-swapping the data below.  Why not set
+  // is_bigendian to true?
   sonar_image.is_bigendian = false;
   sonar_image.data_size = ping.dataSize();
 
   for (unsigned int r = 0; r < num_ranges; r++) {
     for (unsigned int b = 0; b < num_bearings; b++) {
-      const uint16_t data = ping.image().at_uint16(b, r);
-
       if (ping.dataSize() == 1) {
+        const uint8_t data = ping.image().at_uint8(b, r);
         sonar_image.intensities.push_back(data & 0xFF);
       } else if (ping.dataSize() == 2) {
         // Data is stored little-endian (lower byte first)
+        const uint16_t data = ping.image().at_uint16(b, r);
         sonar_image.intensities.push_back(data & 0xFF);
         sonar_image.intensities.push_back((data & 0xFF00) >> 8);
+      } else if (ping.dataSize() == 4) {
+        // Data is stored in the sonar_image little-endian (lower byte first)
+        const uint32_t data = ping.image().at_uint32(b, r);
+        sonar_image.intensities.push_back(data & 0x000000FF);
+        sonar_image.intensities.push_back((data & 0x0000FF00) >> 8);
+        sonar_image.intensities.push_back((data & 0x00FF0000) >> 16);
+        sonar_image.intensities.push_back((data & 0xFF000000) >> 24);
       }
+
     }
   }
 

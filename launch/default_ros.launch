@@ -9,7 +9,7 @@
   <arg name="freqMode" default="2"/>
   <arg name="ipAddress" default="auto"/>
   <arg name="send_gain" default="true"/>
-  <arg name="data16bit" default="false"/>
+  <arg name="data_size" default="8bit"/>
 
   <!-- If true, also launches a sonar_draw node -->
   <arg name="sonar_draw" default="false"/>
@@ -22,8 +22,8 @@
     <param name="gamma" value="$(arg gamma)"/>
     <param name="gainPercent" value="$(arg gainPercent)"/>
     <param name="freqMode" value="$(arg freqMode)"/>
-    <param name="data_16bit" value="$(arg data16bit)"/>
-    <param name="send_gain" value="$(arg sendGain"/>
+    <param name="data_size" value="$(arg data_size)"/>
+    <param name="send_gain" value="$(arg send_gain"/>
   </node>
 
   <node pkg="oculus_sonar_driver" type="oculus_draw" name="oculus_draw" if="$(arg sonar_draw)"/>
