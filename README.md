@@ -39,6 +39,33 @@ Parameters within `default_ros.launch` can be modified to change the starting co
 
 Running the command `roslaunch oculus_sonar_driver sonar_and_cameras.launch` will start the publisher and subscriber nodes, the publisher node from [blackmagic_ros](https://gitlab.com/apl-ocean-engineering/blackmagic_ros), and a dashboard in rqt_gui displaying the sonar imagery, blackmagic cameras, and dynamic reconfigure.
 
+----
+# A note about sonar resolution
+
+(This is inferred from experimental data, it's not from Blueprint)
+
+The sonar appears to have a fixed maximum number of range bins, approx 720.  It also has fixed quantized range resolutions:  ~2.8mm, ~5.6mm, etc.  So the number of range bins N present in data at a given range R in meters is:
+
+```
+N = R / (2^k * 2.8mm)  minimizing k s.t. N <= 720
+```
+
+This means, for example:
+
+| Range (m) | Bins | Resolution |
+|-----------|------|------------|
+| 2.0 | 709 | 2.8mm |
+| 2.02 | 720 | 2.8mm |
+| 3 | 532 | 5.6mm |
+| 4 | 709 | 5.6mm |
+| 4.065 | 720 | 5.6mm |
+| 5 | 443 | 11.2mm |
+| 6 | 532 | 11.2mm |
+
+etc.   This effect seems to be invariant of 256 v 512 beams, and 8/16/32 bit data.  Haven't tested in the lower frequency mode
+
+
+----
 # License
 
 This repository is covered by the [BSD 3-Clause License](LICENSE).
