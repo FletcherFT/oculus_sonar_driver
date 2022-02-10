@@ -104,8 +104,13 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
   sonar_config_.sendRangeAsMeters(config.send_range_as_meters)
                 .setSendGain(config.send_gain)
                 .setSimpleReturn(config.send_simple_return)
-                .setGainAssistance(config.gain_assistance)
-                .set512Beams(config.all_beams);
+                .setGainAssistance(config.gain_assistance);
+
+  if (config.num_beams==OculusSonar_256beams) {
+    sonar_config_.set512Beams(false);
+  } else {
+    sonar_config_.set512Beams(true);
+  }
 
   // Rather than trust that the .cfg and Oculus enums are the same,
   // do an explicit mapping

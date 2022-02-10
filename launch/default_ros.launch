@@ -3,7 +3,7 @@
 -->
 <launch>
   <arg name="range" default="2"/>
-  <arg name="gainPercent" default="50"/>
+  <arg name="gain_percent" default="100"/>
   <arg name="gamma" default="127"/>
   <arg name="pingRate" default="0"/>
   <arg name="freqMode" default="2"/>
@@ -26,7 +26,7 @@
       <param name="range" value="$(arg range)"/>
       <param name="pingRate" value="$(arg pingRate)"/>
       <param name="gamma" value="$(arg gamma)"/>
-      <param name="gainPercent" value="$(arg gainPercent)"/>
+      <param name="gain" value="$(arg gain_percent)"/>
       <param name="freqMode" value="$(arg freqMode)"/>
       <param name="data_size" value="$(arg data_size)"/>
       <param name="send_gain" value="$(arg send_gain"/>
