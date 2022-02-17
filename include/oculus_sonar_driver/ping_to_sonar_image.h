@@ -20,12 +20,13 @@ acoustic_msgs::SonarImage pingToSonarImage(const liboculus::SimplePingResult<Pin
 
   sonar_image.frequency = ping.ping()->frequency;
 
-  // \todo This is actually frequency dependent
+  // These fields are frequency dependent
   if (sonar_image.frequency > 2000000) {
-    sonar_image.azimuth_beamwidth = liboculus::Oculus_2100MHz::AzimuthBeamwidthRad;
+    sonar_image.azimuth_beamwidth   = liboculus::Oculus_2100MHz::AzimuthBeamwidthRad;
     sonar_image.elevation_beamwidth = liboculus::Oculus_2100MHz::ElevationBeamwidthRad;
-  } else if ((sonar_image.frequency > 1100000) && (sonar_image.frequency < 1300000)) {
-    sonar_image.azimuth_beamwidth = liboculus::Oculus_1200MHz::AzimuthBeamwidthRad;
+  } else if ((sonar_image.frequency > 1100000)
+          && (sonar_image.frequency < 1300000)) {
+    sonar_image.azimuth_beamwidth   = liboculus::Oculus_1200MHz::AzimuthBeamwidthRad;
     sonar_image.elevation_beamwidth = liboculus::Oculus_1200MHz::ElevationBeamwidthRad;
   } else {
     ROS_ERROR_STREAM("Unsupported frequency received from oculus: "
@@ -47,10 +48,10 @@ acoustic_msgs::SonarImage pingToSonarImage(const liboculus::SimplePingResult<Pin
   // (Aaron):  We don't actually know.  Given there's no way to
   //    set "minimum range", and it's not in the data struct, we
   //    have to assume is starts from zero, though as you say, it
-  //    could actually be another arbitrary constant.
+  //    could actually start at an arbitrary offset.
   sonar_image.ranges.resize(num_ranges);
   for (unsigned int i = 0; i < num_ranges; i++) {
-    sonar_image.ranges[i] = static_cast<float>(i+0.5) 
+    sonar_image.ranges[i] = static_cast<float>(i+0.5)
                             * ping.ping()->rangeResolution;
   }
 

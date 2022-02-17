@@ -12,6 +12,9 @@
 
 namespace oculus_sonar_driver {
 
+using liboculus::SimplePingResultV1;
+using liboculus::SimplePingResultV2;
+
 OculusDriver::OculusDriver()
   : Nodelet(),
     io_srv_(),
@@ -50,15 +53,15 @@ void OculusDriver::onInit() {
 
   data_rx_.setRawPublisher(raw_data_pub_);
 
-  data_rx_.setCallback<liboculus::SimplePingResultV1>(std::bind(&OculusDriver::pingCallback<liboculus::SimplePingResultV1>,
+  data_rx_.setCallback<SimplePingResultV1>(std::bind(&OculusDriver::pingCallback<SimplePingResultV1>,
                                             this, std::placeholders::_1));
 
-  data_rx_.setCallback<liboculus::SimplePingResultV2>(std::bind(&OculusDriver::pingCallback<liboculus::SimplePingResultV2>,
+  data_rx_.setCallback<SimplePingResultV2>(std::bind(&OculusDriver::pingCallback<SimplePingResultV2>,
                                             this, std::placeholders::_1));
 
   // When the node connects, start the sonar pinging by sending
   // a OculusSimpleFireMessage current configuration.
-  data_rx_.setOnConnectCallback( [&]() {
+  data_rx_.setOnConnectCallback([&]() {
     data_rx_.sendSimpleFireMessage(sonar_config_);
   });
 
@@ -68,7 +71,7 @@ void OculusDriver::onInit() {
 
   if (ip_address_ == "auto") {
     NODELET_INFO_STREAM("Attempting to auto-detect sonar");
-    status_rx_.setCallback( [&](const liboculus::SonarStatus &status, bool is_valid) {
+    status_rx_.setCallback([&](const liboculus::SonarStatus &status, bool is_valid) {
       if (!is_valid || data_rx_.isConnected()) return;
       data_rx_.connect(status.ipAddr());
     });
@@ -106,10 +109,10 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
                 .setSimpleReturn(config.send_simple_return)
                 .setGainAssistance(config.gain_assistance);
 
-  if (config.num_beams==OculusSonar_256beams) {
-    sonar_config_.set512Beams(false);
+  if (config.num_beams == OculusSonar_256beams) {
+    sonar_config_.use256Beams();
   } else {
-    sonar_config_.set512Beams(true);
+    sonar_config_.use512Beams();
   }
 
   // Rather than trust that the .cfg and Oculus enums are the same,
