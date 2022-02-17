@@ -38,7 +38,8 @@ void OculusDriver::onInit() {
   NODELET_DEBUG_STREAM("Advertising topics in namespace " << n_.getNamespace());
   NODELET_DEBUG_STREAM("Private namespace would be:" << pn_.getNamespace());
 
-  imaging_sonar_pub_ = n_.advertise<acoustic_msgs::SonarImage>("sonar_image", 100);
+  imaging_sonar_pub_ = n_.advertise<acoustic_msgs::SonarImage>("sonar_image", 10);
+  oculus_meta_pub_ = n_.advertise<oculus_sonar_driver::OculusMetadata>("oculus_metadata",10);
   raw_data_pub_ = n_.advertise<apl_msgs::RawData>("raw_data", 100);
 
   // NB: Params set in the launch file go to /raven/oculus's namespace,

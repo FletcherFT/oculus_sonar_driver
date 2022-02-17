@@ -1,19 +1,29 @@
 <!-- Launches oculus_publisher, oculus_subscriber, and dynamic reconfigure gui
      with default sonar parameters (as defined in SimpleFireMessage.cpp)
+
+  By default, this launch file **doesn't** launch a sonar_image_proc/draw_sonar
+  node.  Set draw_sonar:=true to have it run.
+
+  If postprocess_sonar:=true, a sonar_postprocessor node will also be
+  started
+
+  Various sonar params can also be started with launchfile args.
+  Other than ip_address, these parameters are also available through
+  dynamic_reconfigure
 -->
 <launch>
   <arg name="range" default="2"/>
   <arg name="gain_percent" default="100"/>
   <arg name="gamma" default="127"/>
-  <arg name="pingRate" default="0"/>
-  <arg name="freqMode" default="2"/>
-  <arg name="ipAddress" default="auto"/>
+  <arg name="ping_rate" default="0"/>
+  <arg name="freq_mode" default="2"/>
+  <arg name="ip_address" default="auto"/>
   <arg name="send_gain" default="true"/>
   <arg name="data_size" default="8bit"/>
 
   <!-- If true, also launches a sonar_draw node -->
-  <arg name="sonar_draw" default="false"/>
-  <arg name="sonar_postprocess" default="false"/>
+  <arg name="draw_sonar" default="false"/>
+  <arg name="postprocess_sonar" default="false"/>
 
   <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager" output="screen"/>
 
@@ -22,12 +32,12 @@
     <node pkg="nodelet" type="nodelet" name="oculus_sonar_driver"
           args="load oculus_sonar/driver /nodelet_manager"
           output="screen">
-      <param name="ipAddress" value="$(arg ipAddress)"/>
+      <param name="ip_address" value="$(arg ip_address)"/>
       <param name="range" value="$(arg range)"/>
-      <param name="pingRate" value="$(arg pingRate)"/>
+      <param name="ping_rate" value="$(arg ping_rate)"/>
       <param name="gamma" value="$(arg gamma)"/>
       <param name="gain" value="$(arg gain_percent)"/>
-      <param name="freqMode" value="$(arg freqMode)"/>
+      <param name="freq_mode" value="$(arg freq_mode)"/>
       <param name="data_size" value="$(arg data_size)"/>
       <param name="send_gain" value="$(arg send_gain"/>
     </node>
@@ -35,12 +45,12 @@
     <node pkg="nodelet" type="nodelet" name="draw_sonar"
           args="load sonar_image_proc/draw_sonar /nodelet_manager"
           output="screen"
-          if="$(arg sonar_draw)">
+          if="$(arg draw_sonar)">
         <remap from="sonar_image" to="/oculus/sonar_image"/>
     </node>
   </group>
 
-  <group ns="postprocess" if="$(arg sonar_postprocess)">
+  <group ns="postprocess" if="$(arg postprocess_sonar)">
     <node pkg="nodelet" type="nodelet" name="sonar_postprocessor"
           args="load sonar_image_proc/sonar_postprocessor /nodelet_manager"
           output="screen">
@@ -54,10 +64,9 @@
     <node pkg="nodelet" type="nodelet" name="draw_sonar"
           args="load sonar_image_proc/draw_sonar /nodelet_manager"
           output="screen"
-          if="$(arg sonar_draw)">
+          if="$(arg draw_sonar)">
         <remap from="sonar_image" to="/postprocess/sonar_image"/>
     </node>
-
   </group>
 
 </launch>

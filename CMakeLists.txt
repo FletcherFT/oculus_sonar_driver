@@ -27,11 +27,12 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## Build messages
-# add_message_files(
-#   FILES
-# )
+add_message_files(
+  FILES
+  OculusMetadata.msg
+)
 
-#generate_messages(DEPENDENCIES std_msgs sensor_msgs)
+generate_messages(DEPENDENCIES std_msgs)
 
 
 #add dynamic reconfigure api

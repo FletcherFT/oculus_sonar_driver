@@ -26,6 +26,7 @@
 
 // Auto-generated files
 #include "oculus_sonar_driver/OculusSonarConfig.h"
+#include "oculus_sonar_driver/OculusMetadata.h"
 
 namespace oculus_sonar_driver {
 
@@ -44,6 +45,16 @@ class OculusDriver : public nodelet::Nodelet {
     sonar_msg.header.stamp = ros::Time::now();
     sonar_msg.header.frame_id = frame_id_;
     imaging_sonar_pub_.publish(sonar_msg);
+
+    oculus_sonar_driver::OculusMetadata meta;
+    meta.header = sonar_msg.header;
+
+    // \todo Make this cleaner...
+    for (unsigned int i = 0; i < ping.gains().size(); i++) {
+      meta.tvg.push_back(ping.gains().at(i));
+    }
+
+    oculus_meta_pub_.publish(meta);
   }
 
   // Update configuration based on command from dynamic_reconfigure
@@ -59,7 +70,9 @@ class OculusDriver : public nodelet::Nodelet {
   liboculus::StatusRx status_rx_;
 
   ros::Publisher imaging_sonar_pub_;
+  ros::Publisher oculus_meta_pub_;
   ros::Publisher raw_data_pub_;
+
   std::string ip_address_;
   std::string frame_id_;
 
