@@ -36,7 +36,7 @@ void ReprocessOculusRawData::onInit() {
 // Processes and publishes sonar pings to a ROS topic
 void ReprocessOculusRawData::rawDataCallback(const apl_msgs::RawData::ConstPtr &raw_data) {
   ROS_DEBUG_STREAM("Got raw data seq " << raw_data->header.seq);
-  
+
   // Ignore data out
   if (raw_data->direction != apl_msgs::RawData::DATA_IN) return;
 
@@ -55,14 +55,25 @@ void ReprocessOculusRawData::rawDataCallback(const apl_msgs::RawData::ConstPtr &
 
   const auto msgId = header.msgId();
   if (msgId == messageSimplePingResult) {
-    liboculus::SimplePingResult ping(buffer);
+    if (header.msgVersion() == 2) {
+      liboculus::SimplePingResultV2 ping(buffer);
 
-    // Publish message parsed into the image format
-    acoustic_msgs::SonarImage sonar_image = pingToSonarImage(ping);
+      // Publish message parsed into the image format
+      acoustic_msgs::SonarImage sonar_image = pingToSonarImage(ping);
 
-    // Overwrite the header with info from the incoming packet
-    sonar_image.header = raw_data->header;
-    sonar_image_pub_.publish(sonar_image);
+      // Overwrite the header with info from the incoming packet
+      sonar_image.header = raw_data->header;
+      sonar_image_pub_.publish(sonar_image);
+    } else {
+      liboculus::SimplePingResultV1 ping(buffer);
+
+      // Publish message parsed into the image format
+      acoustic_msgs::SonarImage sonar_image = pingToSonarImage(ping);
+
+      // Overwrite the header with info from the incoming packet
+      sonar_image.header = raw_data->header;
+      sonar_image_pub_.publish(sonar_image);
+    }
   } else if (msgId == messageLogs) {
     // If it's a log message, just stream to the ROS log
     ROS_INFO_STREAM(std::string(buffer->begin()+sizeof(OculusMessageHeader), buffer->end()));
