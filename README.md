@@ -34,10 +34,24 @@ of the projected sonar data for easy preview (e.g. in `rqt`).
   1. Run `source ./devel/setup.bash` from ``<catkin_ws>``
 
 ## Usage
-Running the command `roslaunch oculus_sonar_driver default_ros.launch` will start both the publisher and subscriber nodes, as well as rqt_reconfigure gui.
-Parameters within `default_ros.launch` can be modified to change the starting configuration of the sonar.
+Running the command `roslaunch oculus_sonar_driver default_ros.launch` will start the sonar driver.
+See the comments in [`default_ros.launch`](launch/default_ros.launch) to set sonar parameters at startup.   Sonar params can also be set
+through dynamic reconfigure (below).
 
-Running the command `roslaunch oculus_sonar_driver sonar_and_cameras.launch` will start the publisher and subscriber nodes, the publisher node from [blackmagic_ros](https://gitlab.com/apl-ocean-engineering/blackmagic_ros), and a dashboard in rqt_gui displaying the sonar imagery, blackmagic cameras, and dynamic reconfigure.
+## dynamic_reconfigure
+
+The sonar params can be modified on the fly using dynamic reconfigure.  The launchfile [`default_ros.launch`](launch/default_ros.launch) starts the nodes in a nodelet manager `/nodelet_manager` to the commands are:
+
+```
+$ rosrun dynamic_reconfigure dynparam get /nodelet_manager           
+{'send_range_as_meters': True, 'send_gain': True, 'send_simple_return': True, 'gain_assistance': False, 'all_beams': True, 'num_beams': 1, 'gamma': 127, 'ping_rate': 0, 'data_size': 0, 'freq_mode': 2, 'range': 2.0, 'gain': 50.0, 'groups': {'id': 0, 'parent': 0, 'name': 'Default', 'type': '', 'state': True, 'groups': {}, 'parameters': {}, 'send_range_as_meters': True, 'send_gain': True, 'send_simple_return': True, 'gain_assistance': False, 'num_beams': 1, 'all_beams': True, 'range': 2.0, 'gain': 50.0, 'gamma': 127, 'ping_rate': 0, 'data_size': 0, 'freq_mode': 2}}
+```
+
+For example, for 32-bit mode:
+
+```
+$ rosrun dynamic_reconfigure dynparam set /nodelet_manager data_size 2
+```
 
 ----
 # A note about sonar resolution
