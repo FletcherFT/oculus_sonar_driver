@@ -3,24 +3,20 @@
 [![Build Status](https://gitlab.drone.camhd.science/api/badges/apl-ocean-engineering/oculus_sonar_driver/status.svg)](https://gitlab.drone.camhd.science/apl-ocean-engineering/oculus_sonar_driver)
 
 ROS nodes that use [liboculus](https://github.com/apl-ocean-engineering/liboculus) to interface with a [Blueprint Subsea Oculus sonar](https://www.blueprintsubsea.com/oculus/index.php) sonar and publish to ROS topics.
-Currently runs on ROS Melodic, Ubuntu 18.04.
+Currently runs on ROS Melodic and Noetic.
 
 At present we have only tested with the [Oculus M1200d](https://www.blueprintsubsea.com/pages/product.php?PN=BP01042) sonar.
-
-NOTE: Images are scaled by SCALE_FACTOR, a macro defaulted to 250 (to help with display)
 
 ## Contents
 
 This package defines the `oculus_sonar/driver` nodelet that interfaces with the sonar
-over ethernet and publishes `acoustic_msgs::SonarImage` and
-`oculus_sonar_driver/OculusSonarRawMsg` messages.
+over ethernet and publishes [`acoustic_msgs::SonarImage`](https://github.com/apl-ocean-engineering/hydrographic_msgs/blob/main/acoustic_msgs/msg/SonarImage.msg) and
+[`apl_msgs::RawData`](https://gitlab.com/apl-ocean-engineering/apl_msgs) messages.
 
-The package also builds a conventional node `oculus_driver` which runs the
-`oculus_sonar/driver` nodelet and an instance of the `draw_sonar` nodelet from
-[sonar_image_proc](https://github.com/apl-ocean-engineering/sonar_image_proc).
-It subscribes to `acoustic_msgs::SonarImage` and produces a `sensor_msgs/Image`
-of the projected sonar data for easy preview (e.g. in `rqt`).
+The package also builds a conventional node `oculus_driver` which is a trivial wrapper around a
+`oculus_sonar/driver` nodelet.
 
+** Note that to visualize the data (as a ROS Image) you need to run a [sonar_image_proc/draw_sonar](https://github.com/apl-ocean-engineering/sonar_image_proc) node/nodelet.  The `default_ros.launch` launchfile will launch this node if `draw_sonar:=true` is passed to it.
 
 ## Installation
 
