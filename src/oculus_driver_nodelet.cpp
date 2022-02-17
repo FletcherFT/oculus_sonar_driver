@@ -49,7 +49,7 @@ void OculusDriver::onInit() {
   //     configured in a launch file.
   n_.param<std::string>("ipAddress", ip_address_, "auto");
 
-  n_.param<std::string>("frameId", frame_id_, "");
+  n_.param<std::string>("frameId", frame_id_, "oculus");
   NODELET_INFO_STREAM("Publishing data with frame = " << frame_id_);
 
   data_rx_.setRawPublisher(raw_data_pub_);

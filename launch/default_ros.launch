@@ -20,6 +20,7 @@
   <arg name="ip_address" default="auto"/>
   <arg name="send_gain" default="true"/>
   <arg name="data_size" default="8bit"/>
+  <arg name="frame_id" default="oculus"/>
 
   <!-- If true, also launches a sonar_draw node -->
   <arg name="draw_sonar" default="false"/>
@@ -39,7 +40,9 @@
       <param name="gain" value="$(arg gain_percent)"/>
       <param name="freq_mode" value="$(arg freq_mode)"/>
       <param name="data_size" value="$(arg data_size)"/>
-      <param name="send_gain" value="$(arg send_gain"/>
+      <param name="send_gain" value="$(arg send_gain)"/>
+
+      <param name="frame_id" value="$(arg frame_id)"/>
     </node>
 
     <node pkg="nodelet" type="nodelet" name="draw_sonar"
