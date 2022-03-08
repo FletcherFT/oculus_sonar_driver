@@ -7,6 +7,7 @@
 #include <apl_msgs/RawData.h>
 
 #include "liboculus/Constants.h"
+#include "liboculus/SonarConfiguration.h"
 #include "oculus_sonar_driver/oculus_driver_nodelet.h"
 #include "oculus_sonar_driver/publishing_data_rx.h"
 
@@ -98,13 +99,41 @@ void OculusDriver::configCallback(const oculus_sonar_driver::OculusSonarConfig &
 
   ROS_INFO_STREAM("Setting ping rate to (" << config.ping_rate << "): "
                   << liboculus::PingRateToHz(config.ping_rate) << " Hz");
-  sonar_config_.setPingRate(static_cast<PingRateType>(config.ping_rate));
+  switch (config.ping_rate) {
+    case OculusSonar_Normal:
+      sonar_config_.setPingRate(pingRateNormal);
+      break;
+    case OculusSonar_High:
+      sonar_config_.setPingRate(pingRateHigh);
+      break;
+    case OculusSonar_Highest:
+      sonar_config_.setPingRate(pingRateHighest);
+      break;
+    case OculusSonar_Low:
+      sonar_config_.setPingRate(pingRateLow);
+      break;
+    case OculusSonar_Lowest:
+      sonar_config_.setPingRate(pingRateLowest);
+      break;
+    case OculusSonar_Standby:
+      sonar_config_.setPingRate(pingRateStandby);
+      break;
+    default:
+      ROS_WARN_STREAM("Unknown ping rate " << config.ping_rate);
+  }
 
   ROS_INFO_STREAM("Setting freq mode to " << liboculus::FreqModeToString(config.freq_mode));
-  sonar_config_.setFreqMode(static_cast<liboculus::SonarConfiguration::OculusFreqMode>(config.freq_mode));
+  switch (config.freq_mode) {
+    case OculusSonar_LowFrequency:
+      sonar_config_.setFreqMode(liboculus::OCULUS_LOW_FREQ);
+      break;
+    case OculusSonar_HighFrequency:
+      sonar_config_.setFreqMode(liboculus::OCULUS_HIGH_FREQ);
+      break;
+    default:
+      ROS_WARN_STREAM("Unknown frequency mode " << config.freq_mode);
+  }
 
-  // I would prefer to just or some consts together, but didn't see a clean
-  // way to do that within dynamic reconfig. Ugly works.
   sonar_config_.sendRangeAsMeters(config.send_range_as_meters)
                 .setSendGain(config.send_gain)
                 .setSimpleReturn(config.send_simple_return)
