@@ -7,14 +7,14 @@ platform:
   arch: amd64
 
 steps:
-- name: build-melodic
-  image: amarburg/drone-ci-ros-melodic:latest
-  commands:
-    - apt update && apt install -y libavdevice-dev
-    - wget -O- https://gitlab.com/amarburg/ros_drone_ci/-/raw/master/bootstrap.sh | /bin/bash
-  environment:
-    ROS_PACKAGES_TO_INSTALL: cv-bridge image-transport
-    VCS_RECURSIVE: true
+# - name: build-melodic
+#   image: amarburg/drone-ci-ros-melodic:latest
+#   commands:
+#     - apt update && apt install -y libavdevice-dev
+#     - wget -O- https://gitlab.com/amarburg/ros_drone_ci/-/raw/master/bootstrap.sh | /bin/bash
+#   environment:
+#     ROS_PACKAGES_TO_INSTALL: cv-bridge image-transport
+#     VCS_RECURSIVE: true
 
 - name: build-noetic
   image: amarburg/drone-ci-ros-noetic:latest
