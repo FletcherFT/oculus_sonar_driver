@@ -24,10 +24,13 @@ The package also builds a conventional node `oculus_driver` which is a trivial w
      1. Use [vcstool](http://wiki.ros.org/vcstool):
         1. Clone this repo to `<catkin_ws>/src`
         1. `cd <catkin_src>`
-        1. `vcs import --input oculus_sonar_driver/oculus_sonar_driver.repos`
+        1. `vcs import --input oculus_sonar_driver/oculus_sonar_driver.rosinstall`
      1. Or install dependencies manually. Clone [liboculus](https://github.com/apl-ocean-engineering/liboculus), [hydrographic_msgs](https://github.com/apl-ocean-engineering/hydrographic_msgs.git) and [g3log_ros](https://gitlab.com/apl-ocean-engineering/g3log_ros) to `<catkin_ws>/src`
-  1. Run `catkin_make` or `catkin build` from ``<catkin_ws>``
-  1. Run `source ./devel/setup.bash` from ``<catkin_ws>``
+  1. Use rosdep to install other dependencies
+     1. `cd <catkin_ws>`
+     2. `rosdep install --from-paths src -i`
+  3. Run `catkin_make` or `catkin build` from ``<catkin_ws>``
+  4. Run `source ./devel/setup.bash` from ``<catkin_ws>``
 
 ## Usage
 Running the command `roslaunch oculus_sonar_driver default_ros.launch` will start the sonar driver.
