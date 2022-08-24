@@ -28,6 +28,10 @@ acoustic_msgs::SonarImage pingToSonarImage(const liboculus::SimplePingResult<Pin
           && (sonar_image.frequency < 1300000)) {
     sonar_image.azimuth_beamwidth   = liboculus::Oculus_1200MHz::AzimuthBeamwidthRad;
     sonar_image.elevation_beamwidth = liboculus::Oculus_1200MHz::ElevationBeamwidthRad;
+  } else if ((sonar_image.frequency > 650000)
+          && (sonar_image.frequency < 850000)) {
+    sonar_image.azimuth_beamwidth   = liboculus::Oculus_750kHz::AzimuthBeamwidthRad;
+    sonar_image.elevation_beamwidth = liboculus::Oculus_750kHz::ElevationBeamwidthRad;
   } else {
     ROS_ERROR_STREAM("Unsupported frequency received from oculus: "
                      << sonar_image.frequency << ". Not publishing SonarImage "
