@@ -1,0 +1,14 @@
+<launch>
+
+<include file="$(find oculus_sonar_driver)/launch/default_ros.launch">
+    <arg name="draw_sonar" value="true"/>
+    <arg name="postprocess_sonar" value="true"/>
+</include>
+
+<node name="sonar_view" pkg="image_view" type="image_view">
+    <remap from="image" to="/postprocess/drawn_sonar"/>
+</node>
+
+<node name="record_oculus" pkg="rosbag" type="record" args="-o oculus -e '/oculus/raw_data' --split --size=3200"/>
+
+</launch>
